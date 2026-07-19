@@ -43,42 +43,35 @@ AI-powered startup co-founder platform that helps founders validate ideas, analy
 ### Stage 1 – Opportunity Discovery
 Identifies the core problem, target users, industry, market timing, and hidden opportunities.
 
-**Representative Sources:** World Bank, OECD, McKinsey & Company, Deloitte Insights, PwC Strategy&, Statista, CB Insights
-
 ---
 
 ### Stage 2 – Business Model & Market Validation
 Generates TAM/SAM/SOM estimates, revenue architecture, competitive analysis, MVP roadmap, team requirements, and estimated startup cost.
-
-**Representative Sources:** Gartner, Statista, Grand View Research, Fortune Business Insights, Crunchbase, IBISWorld, McKinsey & Company
 
 ---
 
 ### Stage 3 – Venture Evaluation
 Evaluates the startup using AI scoring, SWOT analysis, Venture Radar, and Go / Iterate / Stop recommendation.
 
-**Representative Sources:** Y Combinator Library, Harvard Business Review, Sequoia Capital, Bain & Company, CB Insights, Startup Genome, First Round Review
-
 ---
 
 ### Stage 4 – Execution Roadmap
 Creates a phased implementation roadmap with milestones, KPIs, deliverables, timelines, and execution priorities.
-
-**Representative Sources:** Project Management Institute (PMI), Atlassian Agile, Lean Startup, Y Combinator, AWS Startups, Microsoft for Startups, Scrum.org
 
 ---
 
 ### Stage 5 – Investor Pitch Generator
 Generates a complete investor pitch, presentation slides, elevator pitch, and potential investor Q&A.
 
-**Representative Sources:** Sequoia Capital, Y Combinator, Techstars, Guy Kawasaki, Andreessen Horowitz, OpenView, OpenVC
-
 ---
 
 ### Stage 6 – Founder Command Center
 Provides a consolidated executive dashboard combining opportunity analysis, market insights, execution strategy, founder priorities, and final recommendations.
 
-**Representative Sources:** Based on relevant search data available from the market reports.
+**All Representative Sources cited for data :** Based on relevant search data available from the market reports.
+
+---
+
 
 ## Author
 
