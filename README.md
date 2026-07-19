@@ -31,14 +31,14 @@ AI-powered startup co-founder platform that helps founders validate ideas, analy
 - Demo Mode – Explore the platform using sample startup data.
 - Live AI Mode – Generate personalized startup analysis using the Gemini API.
 
-  ## How to Run
+## How to Run
 
 1. Clone the repository.
 2. Open `index.html` in your browser.
 3. Choose Demo Mode or Live AI Mode.
 4. For Live AI Mode, enter your Gemini API key.
 
-   ## Author
+## Author
 
 **Dr. Naveen Gokul R**
 
