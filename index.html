@@ -1,0 +1,4123 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Venture.AI — AI Co-Founder Platform</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=Syne:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+/* ── RESET & TOKENS ─────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06060a;
+  --bg2:#0d0d14;
+  --surface:#12121c;
+  --card:#181827;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.13);
+  --gold:#e8c96d;
+  --gold2:#f5dfa0;
+  --gold-dim:rgba(232,201,109,0.12);
+  --gold-glow:rgba(232,201,109,0.08);
+  --text1:#f2f0ea;
+  --text2:#9e9b91;
+  --text3:#5a5850;
+  --green:#4ade80;
+  --green-bg:rgba(74,222,128,0.1);
+  --red:#f87171;
+  --red-bg:rgba(248,113,113,0.1);
+  --amber:#fbbf24;
+  --amber-bg:rgba(251,191,36,0.1);
+  --blue:#60a5fa;
+  --r:10px;
+  --r2:14px;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text1);
+  font-family:'Syne',sans-serif;
+  font-size:15px;
+  line-height:1.6;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── NOISE TEXTURE OVERLAY ──────────────────────────── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:0.6;
+}
+
+/* ── GRID LINES BG ──────────────────────────────────── */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(232,201,109,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(232,201,109,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;z-index:0;
+}
+
+/* ── LAYOUT ─────────────────────────────────────────── */
+#app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── HEADER ─────────────────────────────────────────── */
+#header{
+  padding:18px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+  background:rgba(6,6,10,0.85);
+  backdrop-filter:blur(20px);
+  position:sticky;top:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(135deg,var(--gold),#c9a33c);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:18px;color:#06060a;font-weight:700;
+}
+.logo-text{font-size:17px;font-weight:700;color:var(--text1);letter-spacing:-0.02em}
+.logo-text span{color:var(--gold)}
+.header-badge{
+  font-size:17px;font-weight:550;letter-spacing:0.03em;text-transform:none;
+  padding:6px 16px;border-radius:18px;
+  border:2px solid rgba(232,201,109,0.28);color:var(--gold);
+  background:rgba(232,201,109,0.06);
+  line-height:1.2;
+}
+
+/* ── PROGRESS BAR ───────────────────────────────────── */
+#progress-wrap{
+  padding:16px 32px 12px;
+  display:flex;align-items:center;gap:16px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg2);
+}
+.step-label{font-size:12px;color:var(--text3);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap}
+.progress-track{flex:1;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),#f5dfa0);border-radius:2px;transition:width 0.5s cubic-bezier(0.4,0,0.2,1)}
+.step-dots{display:flex;gap:6px}
+.dot{
+  width:28px;height:28px;border-radius:50%;
+  border:1.5px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:var(--text3);
+  transition:all 0.3s;cursor:default;
+}
+.dot.active{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
+.dot.done{border-color:var(--green);color:var(--green);background:rgba(74,222,128,0.08)}
+
+/* ── MAIN STAGE AREA ────────────────────────────────── */
+#stage-wrap{flex:1;padding:0;overflow:hidden}
+.stage{display:none;animation:fadeIn 0.4s ease}
+.stage.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── STAGE HERO ─────────────────────────────────────── */
+.stage-hero{
+  padding:48px 48px 32px;
+  max-width:900px;margin:0 auto;
+}
+.stage-tag{
+  display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:12px;
+  padding:4px 10px;border:1px solid var(--gold-dim);border-radius:4px;
+}
+.stage-title{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(28px,4vw,46px);
+  line-height:1.1;letter-spacing:-0.02em;
+  color:var(--text1);margin-bottom:12px;
+}
+.stage-title em{font-style:italic;color:var(--gold)}
+.stage-desc{font-size:22px;color:var(--text2);max-width:540px;line-height:1.7}
+
+/* ── CARDS & SURFACES ───────────────────────────────── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r2);
+  padding:24px;
+}
+.card-sm{padding:16px 20px}
+.card-gold{border-color:rgba(232,201,109,0.2);background:var(--gold-glow)}
+
+/* ── FORMS ──────────────────────────────────────────── */
+textarea,input[type=text]{
+  width:100%;background:var(--surface);
+  border:1px solid var(--border2);border-radius:var(--r);
+  color:var(--text1);font-family:'Syne',sans-serif;font-size:15px;
+  padding:16px 18px;resize:vertical;outline:none;
+  transition:border-color 0.2s;
+}
+textarea:focus,input:focus{border-color:rgba(232,201,109,0.5)}
+textarea::placeholder,input::placeholder{color:var(--text3)}
+
+/* ── BUTTONS ────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 22px;border-radius:var(--r);
+  font-family:'Syne',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all 0.2s;border:none;
+  text-decoration:none;white-space:nowrap;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--gold),#c9a33c);
+  color:#06060a;
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(232,201,109,0.25)}
+.btn-primary:active{transform:scale(0.98)}
+.btn-ghost{
+  background:transparent;color:var(--text2);
+  border:1px solid var(--border2);
+}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text1);background:var(--surface)}
+.btn-sm{padding:8px 16px;font-size:13px}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none!important}
+
+/* ── STAGE NAV ──────────────────────────────────────── */
+.stage-footer{
+  padding:24px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid var(--border);
+  background:var(--bg2);
+  max-width:100%;
+}
+
+/* ── LOADING OVERLAY ────────────────────────────────── */
+#loading-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(6,6,10,0.9);backdrop-filter:blur(8px);
+  z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:20px;
+}
+#loading-overlay.show{display:flex}
+.loader-ring{
+  width:56px;height:56px;border-radius:50%;
+  border:2px solid var(--border2);
+  border-top-color:var(--gold);
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-size:14px;color:var(--text2);font-weight:600;letter-spacing:0.05em;text-align:center}
+.loader-sub{font-size:12px;color:var(--text3);margin-top:4px}
+
+/* ── ERROR BANNER ───────────────────────────────────── */
+.error-banner{
+  background:var(--red-bg);border:1px solid rgba(248,113,113,0.3);
+  border-radius:var(--r);padding:12px 16px;
+  font-size:13px;color:var(--red);margin-bottom:16px;
+  display:none;
+}
+.error-banner.show{display:block}
+
+/* ── GRID LAYOUTS ───────────────────────────────────── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+
+/* ── AI OUTPUT CARDS ────────────────────────────────── */
+.output-section{max-width:900px;margin:0 auto;padding:0 48px 48px}
+.section-label{
+  font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:8px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.data-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  overflow:hidden;margin-bottom:12px;
+}
+.data-card-head{
+  padding:14px 20px;display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;transition:background 0.2s;
+}
+.data-card-head:hover{background:rgba(255,255,255,0.02)}
+.data-card-title{font-size:16px;font-weight:600;color:var(--text1)}
+.data-card-icon{font-size:18px;transition:transform 0.3s;color:var(--text3)}
+.data-card-body{
+  max-height:0;overflow:hidden;transition:max-height 0.4s ease;
+  border-top:0px solid var(--border);
+}
+.data-card-body.open{max-height:600px;border-top-width:1px}
+.data-card-inner{
+  padding:18px 22px;
+  font-size:20px;
+  color:var(--text1);
+  line-height:1.9;
+}
+
+/* ── SCORE CARDS ────────────────────────────────────── */
+.score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
+.score-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;position:relative;overflow:hidden;
+}
+.score-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 60%,rgba(232,201,109,0.04));
+}
+.score-label{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.score-number{font-family:'DM Serif Display',serif;font-size:32px;color:var(--gold)}
+.score-bar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden}
+.score-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),#f5dfa0);transition:width 1s ease}
+.score-reason{font-size:16px;color:var(--text3);margin-top:8px;line-height:1.5}
+
+/* ── VERDICT ────────────────────────────────────────── */
+.verdict-block{
+  text-align:center;padding:32px;border-radius:var(--r2);
+  border:1px solid var(--border);margin-bottom:24px;
+  position:relative;overflow:hidden;
+}
+.verdict-label{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.verdict-text{font-family:'DM Serif Display',serif;font-size:56px;line-height:1}
+.verdict-prob{font-size:16px;color:var(--text2);margin-top:12px}
+.verdict-prob span{color:var(--text1);font-weight:700;font-size:20px}
+
+/* ── ROADMAP TIMELINE ───────────────────────────────── */
+.timeline{position:relative;padding-left:32px}
+.timeline::before{
+  content:'';position:absolute;left:10px;top:0;bottom:0;
+  width:1px;background:linear-gradient(to bottom,var(--gold),transparent);
+}
+.tl-item{position:relative;margin-bottom:28px}
+.tl-dot{
+  position:absolute;left:-26px;top:4px;
+  width:12px;height:12px;border-radius:50%;
+  border:2px solid var(--gold);background:var(--bg);
+  box-shadow:0 0 10px rgba(232,201,109,0.3);
+}
+.tl-phase{font-size:18px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.tl-title{font-size:15px;font-weight:600;color:var(--text1);margin-bottom:6px}
+.tl-meta{display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.tl-tag{font-size:12px;padding:3px 10px;border-radius:20px;border:1px solid var(--border2);color:var(--text2)}
+.tl-body{font-size:16px;color:var(--text2);line-height:1.75}
+.kpi-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.kpi-chip{font-size:11px;padding:3px 10px;border-radius:4px;background:var(--gold-glow);color:var(--gold);border:1px solid rgba(232,201,109,0.15)}
+
+/* ── PITCH SLIDES ───────────────────────────────────── */
+.slide-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.slide-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:20px;position:relative;
+}
+.slide-num{
+  position:absolute;top:12px;right:14px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);
+}
+.slide-icon{font-size:24px;margin-bottom:10px}
+.slide-name{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:6px}
+.slide-content{font-size:12px;color:var(--text2);line-height:1.6}
+
+/* ── Q&A CARDS ──────────────────────────────────────── */
+.qa-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px 20px;margin-bottom:10px;
+}
+.qa-question{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:8px}
+.qa-answer{font-size:16px;color:var(--text2);line-height:1.75}
+
+/* ── MONO TEXT ──────────────────────────────────────── */
+.mono{font-family:'JetBrains Mono',monospace;font-size:12px}
+
+/* ── CHART CONTAINER ────────────────────────────────── */
+.chart-wrap{position:relative;width:100%;max-width:400px;margin:0 auto}
+
+/* ── COMPETITOR TABLE ───────────────────────────────── */
+.comp-table{width:100%;border-collapse:collapse;font-size:13px}
+.comp-table th{
+  padding:10px 14px;text-align:left;
+  font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--text3);border-bottom:1px solid var(--border);
+}
+.comp-table td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.comp-table tr:last-child td{border-bottom:none}
+
+/* ── SWOT ───────────────────────────────────────────── */
+.swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border)}
+.swot-cell{padding:20px;background:var(--card)}
+.swot-cell:nth-child(2){background:var(--surface)}
+.swot-cell:nth-child(3){background:var(--surface)}
+.swot-cell:nth-child(4){background:var(--card)}
+.swot-head{font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px}
+.swot-s .swot-head{color:var(--green)}
+.swot-w .swot-head{color:var(--red)}
+.swot-o .swot-head{color:var(--gold)}
+.swot-t .swot-head{color:#a78bfa}
+.swot-list{list-style:none}
+.swot-list li{font-size:12px;color:var(--text2);padding:4px 0;line-height:1.5;display:flex;gap:6px}
+.swot-list li::before{content:'—';color:var(--text3);flex-shrink:0}
+
+/* ── EXPORT SECTION ─────────────────────────────────── */
+.export-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.export-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  padding:24px;text-align:center;cursor:pointer;
+  transition:all 0.2s;
+}
+.export-card:hover{border-color:rgba(232,201,109,0.3);background:var(--gold-glow);transform:translateY(-2px)}
+.export-icon{font-size:32px;margin-bottom:12px}
+.export-name{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:4px}
+.export-desc{font-size:12px;color:var(--text3)}
+
+/* ── API KEY SETUP ──────────────────────────────────── */
+#api-setup{
+  position:fixed;inset:0;background:rgba(6,6,10,0.97);
+  z-index:300;display:flex;align-items:center;justify-content:center;
+}
+.api-modal{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--r2);padding:40px;max-width:480px;width:90%;
+}
+
+#launch-choice{position:fixed;inset:0;background:rgba(6,6,10,0.96);z-index:299;display:flex;align-items:center;justify-content:center;padding:24px}
+.launch-modal{background:linear-gradient(180deg,rgba(24,24,39,0.98),rgba(18,18,28,0.98));border:1px solid var(--border2);border-radius:18px;padding:34px;max-width:760px;width:92%;box-shadow:0 30px 80px rgba(0,0,0,0.45)}
+.launch-actions{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0 10px}
+.launch-option{appearance:none;text-align:left;border:1px solid var(--border2);border-radius:16px;padding:18px 18px;background:rgba(255,255,255,0.02);cursor:pointer;transition:transform .2s ease, border-color .2s ease, background .2s ease;color:var(--text1)}
+.launch-option:hover{transform:translateY(-2px);border-color:rgba(232,201,109,0.35);background:rgba(232,201,109,0.06)}
+.launch-option-title{font-size:18px;font-weight:800;letter-spacing:-0.01em;margin-bottom:8px}
+.launch-option-copy{font-size:14px;line-height:1.7;color:var(--text2)}
+.launch-demo{box-shadow:0 0 0 1px rgba(74,222,128,0.08) inset}
+.launch-live{box-shadow:0 0 0 1px rgba(96,165,250,0.08) inset}
+.launch-hint{font-size:13px;color:var(--text3);line-height:1.7;text-align:center;margin-top:10px}
+@media(max-width:640px){.launch-actions{grid-template-columns:1fr}}
+
+.api-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text1);margin-bottom:8px}
+.api-sub{font-size:16px;color:var(--text2);margin-bottom:24px;line-height:1.6}
+
+/* ── LANDING ────────────────────────────────────────── */
+#landing{
+  position:fixed;inset:0;z-index:200;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;text-align:center;padding:40px;
+}
+.landing-tag{
+  font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:20px;padding:5px 14px;
+  border:1px solid rgba(232,201,109,0.3);border-radius:20px;
+  display:inline-block;
+}
+.landing-title{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(36px,6vw,72px);
+  line-height:1.05;letter-spacing:-0.03em;
+  color:var(--text1);margin-bottom:16px;max-width:700px;
+}
+.landing-title em{font-style:italic;color:var(--gold)}
+.landing-sub{font-size:16px;color:var(--text2);margin-bottom:40px;max-width:500px;line-height:1.7}
+.landing-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:40px}
+.chip{
+  font-size:15px;padding:5px 14px;border-radius:20px;
+  border:1px solid var(--border2);color:var(--text2);
+}
+.glow-ring{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:600px;border-radius:50%;
+  border:1px solid rgba(232,201,109,0.06);
+  pointer-events:none;
+}
+.glow-ring::after{
+  content:'';position:absolute;inset:-60px;border-radius:50%;
+  border:1px solid rgba(232,201,109,0.03);
+}
+
+/* ── RESPONSIVE ─────────────────────────────────────── */
+@media(max-width:640px){
+  .stage-hero,.output-section{padding-left:20px;padding-right:20px}
+  .stage-footer{padding:16px 20px}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .swot-grid{grid-template-columns:1fr}
+  #progress-wrap{padding:12px 20px}
+  .step-dots{display:none}
+}
+
+/* ── UTIL ───────────────────────────────────────────── */
+.hidden{display:none!important}
+.demo-locked{caret-color:transparent;user-select:text;opacity:0.92;filter:saturate(1.05)}
+.text-gold{color:var(--gold)}
+.text-green{color:var(--green)}
+.text-red{color:var(--red)}
+.fw6{font-weight:600}
+.mb8{margin-bottom:8px}
+.mb16{margin-bottom:16px}
+.mb24{margin-bottom:24px}
+.mt16{margin-top:16px}
+ul.bullet{list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.bullet li{font-size:16px;color:var(--text2);padding-left:14px;position:relative;line-height:1.5}
+ul.bullet li::before{content:'·';position:absolute;left:0;color:var(--gold)}
+
+/* ── PDF PRINT CONTAINER ────────────────────────────── */
+
+#s1-opportunity .vp-rich-list li,
+#s1-opportunity p{
+  font-size:17px !important;
+  line-height:1.9 !important;
+  color:#f6f1e8 !important;
+}
+#s1-cards .card div[style*="font-size:17px"]{
+  color:#f8f4eb !important;
+}
+#s2-summary p,
+#s2-revenue p,
+#s2-revenue li,
+#s2-mvp li,
+#s2-team-cost li,
+#s3-recommendation p,
+#s3-recommendation li,
+#execution-center-content p,
+#execution-center-content li{
+  font-size:17px !important;
+  line-height:1.9 !important;
+}
+#s2-market .card,
+#s2-team-cost .card,
+#s3-scores .score-card{
+  color:#f5efe3;
+}
+
+/* ===== Final readability + graphics overrides ===== */
+.step-dots{display:flex;gap:10px;align-items:center;flex-wrap:nowrap}
+.dot{
+  width:30px;height:30px;border-radius:999px;
+  display:flex;align-items:center;justify-content:center;
+  border:1.5px solid rgba(255,255,255,.14);
+  font-size:18px;font-weight:900;line-height:1;
+  color:var(--text3);opacity:.85;
+  background:rgba(255,255,255,0.02);
+  transition:all .25s ease;
+}
+.dot.active{
+  border-color:rgba(232,201,109,.75);
+  background:rgba(232,201,109,.16);
+  color:var(--gold);
+  opacity:1;
+  transform:translateY(-1px) scale(1.06);
+  box-shadow:0 0 0 1px rgba(232,201,109,.10), 0 0 18px rgba(232,201,109,.10) inset;
+}
+.dot.done{
+  border-color:rgba(74,222,128,.75);
+  background:rgba(74,222,128,.16);
+  color:var(--green);
+  opacity:1;
+  box-shadow:0 0 0 1px rgba(74,222,128,.10), 0 0 18px rgba(74,222,128,.08) inset;
+}
+.stage-footer .btn-primary{white-space:nowrap}
+
+
+.stage-footer{flex-wrap:wrap;gap:12px;}
+.vp-golden-footnote{
+  width:100%;
+  text-align:center;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid rgba(232,201,109,0.12);
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:0.04em;
+  color:var(--gold);
+  text-shadow:0 0 10px rgba(232,201,109,0.18);
+}
+.vp-golden-footnote a{
+  color:var(--gold);
+  text-decoration:none;
+  font-weight:700;
+}
+
+/* Stage 6 execution visuals */
+.vp-flow{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px;
+}
+.vp-flow-node{
+  padding:14px 14px 12px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  position:relative;
+  overflow:hidden;
+}
+.vp-flow-node::before{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 50%,rgba(232,201,109,.06));
+  pointer-events:none;
+}
+.vp-flow-step{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:999px;
+  background:rgba(74,222,128,.15);color:var(--green);
+  font-size:14px;font-weight:900;margin-bottom:10px;
+  border:1px solid rgba(74,222,128,.45);
+}
+.vp-flow-title{font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text1);margin-bottom:6px}
+.vp-flow-copy{font-size:14px;line-height:1.7;color:var(--text2)}
+.vp-mini-bars{display:grid;gap:10px}
+.vp-bar-row{display:grid;grid-template-columns:90px 1fr auto;gap:10px;align-items:center}
+.vp-bar-label{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.vp-bar-track{height:12px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+.vp-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),#c9a33c)}
+.vp-bar-value{font-size:13px;font-weight:700;color:var(--text1);min-width:42px;text-align:right}
+.vp-gauge{
+  width:150px;height:150px;border-radius:50%;
+  background:conic-gradient(var(--green) 0 calc(var(--pct)*1%), rgba(255,255,255,.08) calc(var(--pct)*1%) 100%);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto;position:relative;
+  border:1px solid rgba(255,255,255,.09);
+}
+.vp-gauge::before{
+  content:'';
+  width:112px;height:112px;border-radius:50%;
+  background:var(--bg);
+  border:1px solid rgba(255,255,255,.07);
+  position:absolute;
+}
+.vp-gauge span{position:relative;z-index:1;font-size:28px;font-family:'DM Serif Display',serif;color:var(--text1)}
+.vp-section-note{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;font-weight:700}
+
+.vp-visual-grid{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:14px;
+}
+.vp-chart-card{
+  padding:18px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;
+}
+.vp-chart-title{
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:12px;
+}
+.vp-chart-wrap{
+  position:relative;
+  width:100%;
+  height:260px;
+}
+.vp-chart-wrap canvas{
+  width:100% !important;
+  height:100% !important;
+}
+.vp-moat-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+.vp-moat-pill{
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(232,201,109,0.08);
+  border:1px solid rgba(232,201,109,0.18);
+  font-size:13px;
+  line-height:1.5;
+  color:var(--text1);
+}
+.vp-moat-pill b{
+  color:var(--gold);
+}
+@media(max-width:900px){
+  .vp-visual-grid{grid-template-columns:1fr}
+}
+#landing{
+  position:fixed;inset:0;z-index:200;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(232,201,109,0.05), transparent 18%),
+    radial-gradient(circle at 20% 15%, rgba(232,201,109,0.06), transparent 20%),
+    radial-gradient(circle at 78% 18%, rgba(232,201,109,0.05), transparent 18%),
+    var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;text-align:center;padding:40px;overflow:hidden;
+}
+#landing::before{
+  content:'';
+  position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(232,201,109,.09), transparent 26%),
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,.03), transparent 42%);
+  animation:goldPulse 9s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+#landing::after{
+  content:'';
+  position:absolute;inset:0;
+  background-image:
+    radial-gradient(circle at 16% 20%, rgba(255,243,200,.95) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 80% 26%, rgba(255,243,200,.9) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 28% 76%, rgba(255,243,200,.9) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 70% 68%, rgba(255,243,200,.95) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 46% 40%, rgba(255,243,200,.8) 0 1px, transparent 1.8px);
+  background-size: 260px 260px;
+  opacity:.18;
+  animation:starDrift 18s linear infinite;
+  pointer-events:none;
+}
+@keyframes goldPulse{
+  0%{transform:scale(1);opacity:.62}
+  100%{transform:scale(1.03);opacity:1}
+}
+@keyframes starDrift{
+  0%{transform:translate3d(0,0,0)}
+  100%{transform:translate3d(120px,-60px,0)}
+}
+.landing-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.landing-frame{
+  position:absolute;border-radius:50%;
+  border:1px solid rgba(232,201,109,0.12);
+  box-shadow:0 0 90px rgba(232,201,109,0.04) inset;
+  animation:frameGlow 10s ease-in-out infinite alternate;
+}
+.landing-frame-a{inset:11%}
+.landing-frame-b{inset:15%;border-color:rgba(232,201,109,0.08);animation-delay:1.8s}
+@keyframes frameGlow{
+  0%{transform:scale(1);opacity:.45}
+  100%{transform:scale(1.02);opacity:.95}
+}
+.landing-star{
+  position:absolute;width:4px;height:4px;border-radius:999px;background:#ffe8a6;
+  box-shadow:0 0 16px rgba(232,201,109,.9);
+  animation:starBlink 4s ease-in-out infinite;
+}
+@keyframes starBlink{
+  0%,100%{transform:scale(.6);opacity:.25}
+  50%{transform:scale(1.25);opacity:1}
+}
+.landing-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;}
+
+.step-dots{display:flex;gap:12px;align-items:center}
+.dot{
+  width:auto;height:auto;padding:0 4px;border:none;background:none;
+  font-size:21px;font-weight:900;color:var(--text3);opacity:.42;cursor:default;
+  transition:all .25s ease;line-height:1;
+}
+.dot.active,.dot.done{
+  color:var(--green);
+  opacity:1;
+  transform:translateY(-1px);
+  text-shadow:0 0 12px rgba(74,222,128,.16);
+}
+.dot.active{transform:translateY(-2px) scale(1.08)}
+.stage-desc{font-size:18px;line-height:1.8;max-width:620px}
+textarea,input[type=text],select{
+  font-size:18px !important;
+  line-height:1.8;
+}
+#idea-input{font-size:18px !important;line-height:1.85;min-height:160px}
+#api-key-input,#model-select{font-size:16px !important}
+
+.loader-text{font-size:22px}
+.loader-sub{font-size:16px}
+
+#s1-cards [style*="font-size:11px"]{font-size:14px !important}
+#s1-cards [style*="font-size:14px"]{font-size:17px !important}
+#s1-opportunity .bullet li{font-size:17px !important;line-height:1.85}
+#s1-opportunity p{font-size:18px !important;line-height:1.85}
+
+#s2-summary [style*="font-size:15px"]{font-size:18px !important;line-height:1.85}
+#s2-market [style*="font-size:11px"]{font-size:14px !important}
+#s2-market [style*="font-size:13px"]{font-size:16px !important;line-height:1.75}
+#s2-revenue [style*="font-size:11px"]{font-size:14px !important}
+#s2-revenue [style*="font-size:12px"]{font-size:14px !important}
+#s2-revenue [style*="font-size:13px"]{font-size:16px !important}
+#s2-revenue [style*="font-size:14px"]{font-size:17px !important;line-height:1.8}
+#s2-mvp .bullet li,#s2-team-cost .bullet li{font-size:17px !important;line-height:1.85}
+#s2-team-cost p{font-size:17px !important;line-height:1.85}
+.comp-table{font-size:16px}
+.comp-table td{font-size:16px;line-height:1.7}
+.comp-table th{font-size:13px}
+
+.score-label{font-size:14px !important}
+.score-number{font-size:42px !important}
+.score-reason{font-size:16px !important;line-height:1.8}
+.verdict-label{font-size:14px !important}
+.verdict-prob{font-size:18px !important}
+.verdict-prob span{font-size:22px !important}
+.swot-head{font-size:14px !important}
+.swot-list li{font-size:16px !important;line-height:1.85}
+.ai-rec-text{font-size:18px !important;line-height:1.85}
+
+.tl-title{font-size:24px !important}
+.tl-tag{font-size:15px !important}
+.tl-deliverables{font-size:16px !important;line-height:1.85}
+.kpi-chip{font-size:14px !important}
+.risk-pill{font-size:14px !important}
+
+.elevator-text{font-size:26px !important;line-height:1.85}
+.pitch-full-text{font-size:18px !important;line-height:1.95}
+.slide-name{font-size:18px !important}
+.slide-list li{font-size:16px !important;line-height:1.75}
+.qa-question{font-size:18px !important}
+.qa-answer{font-size:17px !important;line-height:1.85}
+
+.export-grid{grid-template-columns:1fr}
+.export-card-main{max-width:520px;margin:0 auto}
+.export-name{font-size:18px !important}
+.export-desc{font-size:14px !important;line-height:1.7}
+.section-label{font-size:14px}
+
+#pdf-container{
+  position:fixed !important;
+  left:-99999px !important;
+  top:0 !important;
+  width:860px;
+  max-width:860px;
+  background:#ffffff;
+  color:#111111;
+  padding:52px;
+  font-family:'Syne',sans-serif;
+  font-size:16px;
+  line-height:1.8;
+  z-index:-9999 !important;
+  opacity:0 !important;
+  visibility:hidden !important;
+  display:none !important;
+  pointer-events:none !important;
+  overflow:auto;
+  box-shadow:none;
+}
+#pdf-container h1{font-size:34px}
+#pdf-container h2{font-size:18px}
+#pdf-container p,#pdf-container li{font-size:16px;line-height:1.8}
+#pdf-container .pdf-meta{font-size:13px}
+#pdf-container .pdf-verdict{font-size:30px}
+#pdf-container .pdf-score-row{font-size:15px}
+
+#s1-opportunity .vp-bullets li,
+#s1-opportunity .bullet li{
+  font-size:18px !important;
+  line-height:1.9 !important;
+  color:#f5f1e7 !important;
+}
+#s1-opportunity .vp-opportunity-text{
+  font-size:18px !important;
+  line-height:1.9 !important;
+  color:#f5f1e7 !important;
+}
+#s2-output .score-reason,
+#s3-output .score-reason,
+#s3-output .swot-list li,
+#s4-output .tl-body,
+#s5-output .qa-answer,
+#execution-center-content p,
+#execution-center-content li{
+  color:#f5f1e7 !important;
+}
+#s2-output .score-label,
+#s3-output .score-label,
+#s3-output .swot-head,
+#s4-output .tl-phase,
+#s5-output .slide-name,
+#execution-center-content .vp-section-note{
+  color:var(--gold) !important;
+}
+
+
+/* ── STAGE 6 VERDICT CARD ─────────────────────────── */
+.vp-verdict-card{
+  margin-bottom:22px;padding:26px;border-radius:18px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));
+  position:relative;overflow:hidden;
+}
+.vp-verdict-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 55%,rgba(232,201,109,0.06));
+  pointer-events:none;
+}
+.vp-verdict-label{
+  font-size:13px;letter-spacing:.12em;text-transform:uppercase;
+  font-weight:800;color:var(--gold);margin-bottom:10px;
+}
+.vp-verdict-main{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:18px;flex-wrap:wrap;
+}
+.vp-verdict-status{
+  font-family:'DM Serif Display',serif;
+  font-size:56px;line-height:1;
+}
+.vp-verdict-status.go{color:var(--green)}
+.vp-verdict-status.iterate{color:var(--amber)}
+.vp-verdict-status.stop{color:var(--red)}
+.vp-verdict-meta{
+  font-size:18px;color:var(--text1);line-height:1.9;
+}
+.vp-verdict-meta span{
+  color:var(--gold);font-weight:800;
+}
+
+
+/* ===== Venture Verdict Card ===== */
+.venture-verdict-card{
+margin-bottom:28px;padding:28px;border-radius:22px;
+border:1px solid rgba(232,201,109,.25);
+background:linear-gradient(145deg,rgba(232,201,109,.08),rgba(255,255,255,.02));
+position:relative;overflow:hidden;
+}
+.venture-verdict-card:before{
+content:'';position:absolute;inset:0;
+background:radial-gradient(circle at top right, rgba(232,201,109,.12), transparent 45%);
+pointer-events:none;
+}
+.verdict-heading{
+font-size:13px;text-transform:uppercase;
+letter-spacing:.18em;color:var(--gold);
+font-weight:700;margin-bottom:12px;
+}
+.verdict-status{
+font-family:'DM Serif Display',serif;
+font-size:56px;line-height:1;margin-bottom:14px;
+}
+.verdict-go{color:#4ade80}
+.verdict-iterate{color:#fbbf24}
+.verdict-stop{color:#f87171}
+.verdict-confidence{
+font-size:20px;color:var(--text1);margin-bottom:10px;
+}
+.verdict-rec{
+font-size:18px;color:var(--text2);line-height:1.8;
+}
+
+
+/* Stage 6: stronger hierarchy + risk pill styling */
+#execution-center-content .section-label,
+#execution-center-content .vp-flow-title,
+#execution-center-content .tl-phase,
+#execution-center-content .tl-tag,
+#execution-center-content .swot-head,
+#execution-center-content .score-label{
+  color: var(--gold) !important;
+}
+
+#execution-center-content .vp-flow-copy,
+#execution-center-content .tl-body,
+#execution-center-content .qa-answer,
+#execution-center-content .slide-content,
+#execution-center-content .score-reason{
+  color: var(--text1) !important;
+}
+
+#execution-center-content .vp-flow-node{
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+#execution-center-content .vp-flow-title{
+  font-size: 26px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase;
+}
+
+#execution-center-content .vp-flow-copy{
+  color: var(--text2) !important;
+  line-height: 1.7 !important;
+}
+
+#execution-center-content .risk-pill,
+#execution-center-content .warn-pill{
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ff9a9a !important;
+  background: rgba(248,113,113,0.12);
+  border: 1px solid rgba(248,113,113,0.28);
+  line-height: 1.4;
+}
+
+#execution-center-content .risk-pill::before,
+#execution-center-content .warn-pill::before{
+  content: '⚠';
+  color: #ff9a9a;
+  flex-shrink: 0;
+}
+
+#execution-center-content .card .section-label{
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: var(--gold) !important;
+}
+
+
+/* ===== DR NAVEEN TARGETED FIXES ===== */
+.comp-table th,
+#stage-2 .section-label{
+ color:var(--gold)!important;
+}
+
+#stage-2 .comp-table td{
+ font-size:16px!important;
+}
+
+#execution-center-content .section-label,
+#execution-center-content [style*="CORE PROBLEM"],
+#execution-center-content [style*="TARGET USERS"],
+#execution-center-content [style*="INDUSTRY"],
+#execution-center-content [style*="WHY NOW"]{
+ color:var(--gold)!important;
+}
+
+#execution-center-content .tl-phase{
+ font-size:18px!important;
+ font-weight:700!important;
+}
+
+#execution-center-content .tl-title{
+ font-size:18px!important;
+ font-weight:600!important;
+}
+
+#execution-center-content p,
+#execution-center-content li,
+#execution-center-content .tl-body{
+ font-size:16px!important;
+ font-weight:400!important;
+ line-height:1.8!important;
+}
+
+#execution-center-content .risk-pill,
+#execution-center-content .warn-pill{
+ font-size:12px!important;
+ font-weight:500!important;
+ color:var(--red)!important;
+ background:rgba(248,113,113,.12)!important;
+ border:1px solid rgba(248,113,113,.28)!important;
+ border-radius:8px!important;
+ padding:5px 10px!important;
+}
+
+
+/* ===== FIXES ===== */
+#execution-center-content .vp-flow-title{color:var(--green)!important;font-size:12px!important;font-weight:600!important;letter-spacing:.04em!important}
+#execution-center-content .vp-flow-copy{font-size:13px!important;font-weight:400!important;line-height:1.55!important;color:#7cf0a8!important}
+#execution-center-content .vp-flow-step{background:rgba(74,222,128,.12)!important;color:var(--green)!important;border:1px solid rgba(74,222,128,.32)!important}
+#execution-center-content [style*="CORE PROBLEM"],
+#execution-center-content [style*="TARGET USERS"],
+#execution-center-content [style*="INDUSTRY"],
+#execution-center-content [style*="WHY NOW"]{color:#67b7ff!important}
+#execution-center-content [style*="EXECUTIVE SUMMARY"]{color:#ff8fd1!important}
+#execution-center-content .comp-table th,
+#execution-center-content [style*="COMPETITORS"]{color:#cfa94a!important;font-size:14px!important;font-weight:600!important}
+#execution-center-content .comp-table td{color:#fff!important;font-size:17px!important;line-height:1.6!important}
+#execution-center-content [style*="REVENUE MODEL"]{color:#59e08a!important}
+#execution-center-content [style*="COMPETITIVE MOAT"]{color:#ff8fd1!important}
+#execution-center-content [style*="VENTURE VERDICT"]{color:var(--gold)!important}
+#execution-center-content [style*="3-MINUTE PITCH"]{color:var(--gold)!important}
+#execution-center-content .risk-pill,
+#execution-center-content .warn-pill{font-size:11px!important;font-weight:400!important;padding:4px 8px!important;border-radius:7px!important}
+
+
+/* ===== EXACT USER REQUESTED COLOR FIXES ONLY ===== */
+
+/* STEP 1 */
+#s1-cards .card:nth-child(1) [style*="letter-spacing"]{color:#ef4444!important;} /* Core Problem red */
+#s1-cards .card:nth-child(2) [style*="letter-spacing"]{color:#22c55e!important;} /* Target Users green */
+#s1-cards .card:nth-child(3) [style*="letter-spacing"]{color:#8b5e3c!important;} /* Industry brown */
+#s1-cards .card:nth-child(4) [style*="letter-spacing"]{color:#1e3a8a!important;} /* Why Now dark blue */
+
+/* Hidden Opportunity paragraph differentiation */
+#s1-opportunity p:last-child,
+#s1-opportunity .vp-opportunity-text{
+  color:#c4b5fd!important; /* lavender */
+}
+
+/* STEP 2 */
+#s2-market .card:nth-child(1) [style*="font-size:22px"]{color:#f4c542!important;} /* TAM */
+#s2-market .card:nth-child(2) [style*="font-size:22px"]{color:#60a5fa!important;} /* SAM */
+#s2-market .card:nth-child(3) [style*="font-size:22px"]{color:#4ade80!important;} /* SOM */
+
+#s2-revenue [style*="REVENUE ARCHITECTURE"]{
+  color:#facc15!important; /* yellow */
+}
+
+#s2-revenue .card:nth-child(2) p,
+#s2-revenue p{
+  color:rgba(255,140,0,.7)!important;
+}
+
+#s2-mvp .section-label,
+#s2-mvp [style*="letter-spacing"]{
+  color:#4fb3d9!important; /* sea blue */
+}
+#s2-mvp li{
+  color:#d8c8ff!important; /* pastel */
+}
+
+#s2-team-cost .card:first-child [style*="letter-spacing"]{
+  color:#7a7f87!important; /* dark silver */
+}
+#s2-team-cost .card:first-child li{
+  color:rgba(250,204,21,.7)!important; /* 70% yellow */
+}
+
+#s2-team-cost .card:last-child [style*="letter-spacing"]{
+  color:#16a34a!important; /* money green */
+}
+
+/* STEP 3 */
+#radar-chart{
+  font-weight:700!important;
+}
+
+/* STEP 6 */
+#execution-center-content [style*="TAM"]{color:#f4c542!important;}
+#execution-center-content [style*="SAM"]{color:#60a5fa!important;}
+#execution-center-content [style*="SOM"]{color:#4ade80!important;}
+
+#execution-center-content .section-label,
+#execution-center-content [style*="letter-spacing"]{
+  color:#d4af37!important; /* golden */
+}
+
+#execution-center-content [style*="Complete execution intelligence generated from your startup idea"]{
+  color:#ffffff!important;
+}
+
+
+/* === TARGETED FIXES FOR CURRENT REQUEST === */
+#s2-output #s2-team-cost > .card:first-child > div:first-child{color:var(--gold)!important;}
+#s2-output .comp-table tbody td:nth-child(2){color:#22c55e!important;}
+#s2-output .comp-table tbody td:nth-child(3){color:#f87171!important;}
+#s2-output #s2-revenue > div:first-child{color:var(--gold)!important;}
+#s2-output #s2-revenue > div:nth-child(2){color:#ffffff!important;}
+
+#s5-full{
+  font-size:16px!important;
+  line-height:1.9!important;
+  color:var(--blue)!important;
+}
+#s5-slides .slide-name,
+#s5-slides .bullet li{
+  color:#ffffff!important;
+}
+
+#execution-center-content .vp-flow-copy{
+  font-size:14px!important;
+}
+
+#execution-center-content .slide-name,
+#execution-center-content .bullet li{
+  color:#ffffff!important;
+}
+
+#stage-6 .card[style*="text-align:center"] > div[style*="font-size:14px;color:var(--text3)"]{
+  color:#ffffff!important;
+}
+
+
+/* ===== FINAL TARGETED VISUAL FIXES ===== */
+#execution-center-content .vp-flow-title{
+  color:var(--green)!important;
+  font-size:16px!important;
+  font-weight:800!important;
+  letter-spacing:.05em!important;
+  text-transform:uppercase;
+}
+#execution-center-content .vp-flow-copy{
+  font-size:15px!important;
+  color:#7cf0a8!important;
+  line-height:1.7!important;
+}
+#s5-slides .bullet li,
+#execution-center-content .slide-grid .bullet li{
+  color:#ffffff!important;
+}
+#s5-full{
+  color:var(--blue)!important;
+  font-size:17px!important;
+  line-height:1.9!important;
+  font-weight:500!important;
+}
+#s3-output .swot-s .swot-list li,
+#execution-center-content .swot-s .swot-list li{color:#86efac!important;font-weight:600!important;}
+#s3-output .swot-w .swot-list li,
+#execution-center-content .swot-w .swot-list li{color:#fda4af!important;font-weight:600!important;}
+#s3-output .swot-o .swot-list li,
+#execution-center-content .swot-o .swot-list li{color:#93c5fd!important;font-weight:600!important;}
+#s3-output .swot-t .swot-list li,
+#execution-center-content .swot-t .swot-list li{color:#fdba74!important;font-weight:600!important;}
+
+#s4-timeline .tl-item,
+#execution-center-content .timeline .tl-item{
+  padding:18px 18px 18px 20px;
+  border-radius:18px;
+  overflow:hidden;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+}
+#s4-timeline .tl-item:nth-child(1),
+#execution-center-content .timeline .tl-item:nth-child(1){
+  background:linear-gradient(135deg,rgba(96,165,250,0.08),rgba(255,255,255,0.02));
+}
+#s4-timeline .tl-item:nth-child(2),
+#execution-center-content .timeline .tl-item:nth-child(2){
+  background:linear-gradient(135deg,rgba(74,222,128,0.08),rgba(255,255,255,0.02));
+}
+#s4-timeline .tl-item:nth-child(3),
+#execution-center-content .timeline .tl-item:nth-child(3){
+  background:linear-gradient(135deg,rgba(232,201,109,0.09),rgba(255,255,255,0.02));
+}
+#s4-timeline .tl-item:nth-child(4),
+#execution-center-content .timeline .tl-item:nth-child(4){
+  background:linear-gradient(135deg,rgba(167,139,250,0.08),rgba(255,255,255,0.02));
+}
+#s4-timeline .tl-item:nth-child(5),
+#execution-center-content .timeline .tl-item:nth-child(5){
+  background:linear-gradient(135deg,rgba(248,113,113,0.08),rgba(255,255,255,0.02));
+}
+#s4-timeline .tl-item::before,
+#execution-center-content .timeline .tl-item::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,transparent 55%,rgba(232,201,109,0.04));
+  pointer-events:none;
+}
+#s4-timeline .tl-body,
+#execution-center-content .timeline .tl-body{
+  color:#f5f1e7!important;
+}
+#s2-team-cost .bullet li{
+  color:#1e3a8a!important;
+  font-weight:600!important;
+}
+#execution-center-content .card[style*="font-size:14px;color:var(--text3)"]{
+  color:#ffffff!important;
+}
+
+
+
+/* ===== FINAL REQUEST OVERRIDES ===== */
+#s2-team-cost .card:first-child li{
+  color:#1e3a8a !important;
+  font-weight:600 !important;
+}
+#s2-revenue > div:nth-child(2),
+#s2-revenue > div:nth-child(2) *{
+  color:#7fe3d4 !important;
+  font-weight:800 !important;
+}
+#s2-revenue > div:nth-child(3),
+#s2-revenue > div:nth-child(3) *{
+  color:var(--text2) !important;
+  font-weight:500 !important;
+}
+#execution-center-content .summary-revenue-architecture,
+#execution-center-content .summary-revenue-architecture *{
+  color:#7fe3d4 !important;
+  font-weight:800 !important;
+}
+#execution-center-content .summary-competitive-moat,
+#execution-center-content .summary-competitive-moat *{
+  color:var(--text2) !important;
+  font-weight:500 !important;
+}
+#execution-center-content .summary-team-requirement li{
+  color:#1e3a8a !important;
+  font-weight:600 !important;
+}
+#execution-center-content .summary-mvp-features li{
+  color:#d8c8ff !important;
+}
+#execution-center-content .summary-estimated-cost,
+#execution-center-content .summary-estimated-cost *{
+  color:var(--text1) !important;
+}
+#execution-center-content .vp-flow-title{
+  color:var(--green) !important;
+  font-size:15px !important;
+  font-weight:700 !important;
+  letter-spacing:0.05em !important;
+}
+#execution-center-content .vp-flow-copy{
+  font-size:14px !important;
+  line-height:1.7 !important;
+  color:#7cf0a8 !important;
+}
+#execution-center-content .vp-flow-step{
+  background:rgba(74,222,128,.12) !important;
+  color:var(--green) !important;
+  border:1px solid rgba(74,222,128,.32) !important;
+}
+#execution-center-content .card[style*="font-size:14px;color:var(--text3)"]{
+  color:#ffffff !important;
+}
+
+
+/* ===== USER REQUESTED FINAL OVERRIDES ===== */
+.step-label{
+  font-size:18px !important;
+  color:#60a5fa;
+  font-weight:600 !important;
+  letter-spacing:0.08em !important;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+#execution-center-content .vp-flow-title{
+  font-size:13px !important;
+  font-weight:700 !important;
+  letter-spacing:0.05em !important;
+  text-transform:uppercase;
+  color:var(--green) !important;
+}
+#execution-center-content .vp-flow-copy{
+  font-size:14px !important;
+  line-height:1.7 !important;
+  color:#7cf0a8 !important;
+}
+
+#s2-team-cost .card:first-child > div:first-child,
+#execution-center-content .summary-team-requirement > div:first-child{
+  font-size:16px !important;
+  font-weight:700 !important;
+  letter-spacing:0.08em !important;
+  text-transform:uppercase !important;
+  color:var(--gold) !important;
+  margin-bottom:12px !important;
+}
+#s2-team-cost .card:first-child li,
+#execution-center-content .summary-team-requirement li{
+  font-size:17px !important;
+  line-height:1.85 !important;
+  font-weight:600 !important;
+}
+#s2-team-cost .card:first-child li:nth-child(1),
+#execution-center-content .summary-team-requirement li:nth-child(1){color:#60f7fa !important;}
+#s2-team-cost .card:first-child li:nth-child(2),
+#execution-center-content .summary-team-requirement li:nth-child(2){color:#4ff19a !important;}
+#s2-team-cost .card:first-child li:nth-child(3),
+#execution-center-content .summary-team-requirement li:nth-child(3){color:#e0ce14 !important;}
+#s2-team-cost .card:first-child li:nth-child(4),
+#execution-center-content .summary-team-requirement li:nth-child(4){color:#e137ed !important;}
+
+#s2-team-cost .card:last-child > div:first-child,
+#execution-center-content .summary-estimated-cost > div:first-child{
+  font-size:18px !important;
+  font-weight:700 !important;
+  letter-spacing:0.08em !important;
+  text-transform:uppercase !important;
+  color:var(--text3) !important;
+  margin-bottom:12px !important;
+}
+#s2-team-cost .card:last-child > div:last-child,
+#execution-center-content .summary-estimated-cost > div:last-child{
+  font-size:17px !important;
+  line-height:1.85 !important;
+  color:var(--text1) !important;
+}
+
+#s2-revenue > div:first-child,
+#execution-center-content .summary-revenue-architecture > div:first-child{
+  font-size:13px !important;
+  font-weight:700 !important;
+  letter-spacing:0.08em !important;
+  text-transform:uppercase !important;
+  color:var(--gold) !important;
+  margin-bottom:12px !important;
+}
+#s2-revenue > div:nth-child(2),
+#s2-revenue > div:nth-child(2) *,
+#execution-center-content .summary-revenue-architecture > div:last-child,
+#execution-center-content .summary-revenue-architecture > div:last-child *{
+  font-size:17px !important;
+  line-height:1.85 !important;
+  color:#7fe3d4 !important;
+  font-weight:600 !important;
+}
+#s2-revenue > div:nth-child(3) > div:first-child,
+#execution-center-content .summary-competitive-moat > div:first-child{
+  font-size:13px !important;
+  font-weight:700 !important;
+  letter-spacing:0.08em !important;
+  text-transform:uppercase !important;
+  color:#f87171 !important;
+  margin-bottom:8px !important;
+}
+#s2-revenue > div:nth-child(3) > div:last-child,
+#s2-revenue > div:nth-child(3) > div:last-child *,
+#execution-center-content .summary-competitive-moat > div:last-child,
+#execution-center-content .summary-competitive-moat > div:last-child *{
+  font-size:17px !important;
+  line-height:1.8 !important;
+  color:#f87171 !important;
+  font-weight:700 !important;
+  text-transform:uppercase !important;
+}
+
+#stage-2 .comp-table td,
+#execution-center-content .comp-table td{
+  font-size:18px !important;
+  line-height:1.8 !important;
+  color:#ffffff !important;
+}
+#stage-2 .comp-table th,
+#execution-center-content .comp-table th{
+  font-size:14px !important;
+  color:var(--gold) !important;
+}
+
+#s2-summary p,
+#s2-revenue p,
+#s2-revenue li,
+#s2-mvp li,
+#s2-team-cost li,
+#s3-recommendation p,
+#s3-recommendation li,
+#execution-center-content p,
+#execution-center-content li{
+  font-size:17px !important;
+  line-height:1.9 !important;
+}
+
+#s3-recommendation{
+  color:var(--green) !important;
+  font-size:17px !important;
+}
+#radar-chart text{
+  fill:#ffffff !important;
+  font-weight:700 !important;
+}
+
+#s5-full,
+#execution-center-content .summary-full-pitch{
+  color:var(--blue) !important;
+  font-size:17px !important;
+  line-height:1.9 !important;
+  font-weight:500 !important;
+}
+#s5-slides .slide-name,
+#execution-center-content .slide-name{
+  font-size:18px !important;
+  font-weight:700 !important;
+  letter-spacing:0.01em !important;
+}
+#s5-slides .bullet li,
+#execution-center-content .slide-grid .bullet li{
+  color:#ffffff !important;
+  font-size:16px !important;
+  line-height:1.75 !important;
+}
+
+#execution-center-content .swot-s .swot-list li,
+#s3-output .swot-s .swot-list li{color:#86efac !important;font-weight:600 !important;}
+#execution-center-content .swot-w .swot-list li,
+#s3-output .swot-w .swot-list li{color:#fda4af !important;font-weight:600 !important;}
+#execution-center-content .swot-o .swot-list li,
+#s3-output .swot-o .swot-list li{color:#93c5fd !important;font-weight:600 !important;}
+#execution-center-content .swot-t .swot-list li,
+#s3-output .swot-t .swot-list li{color:#fdba74 !important;font-weight:600 !important;}
+
+#execution-center-content .card[style*="font-size:14px;color:var(--text3)"],
+#stage-6 .card[style*="text-align:center"] > div[style*="font-size:14px;color:var(--text3)"]{
+  color:#ffffff !important;
+}
+
+#execution-center-content .summary-query-snapshot,
+#execution-center-content .summary-query-snapshot *{
+  color:#ffffff !important;
+}
+
+
+/* FINAL PATCH */
+#s2-revenue > div:nth-child(3) > div:last-child,
+#s2-revenue > div:nth-child(3) > div:last-child *,
+#execution-center-content .summary-competitive-moat > div:last-child,
+#execution-center-content .summary-competitive-moat > div:last-child *{
+  text-transform:none !important;
+  font-size:15px !important;
+  line-height:1.75 !important;
+}
+#s2-team-cost .card:last-child > div:first-child,
+#execution-center-content .summary-estimated-cost > div:first-child{
+ color:var(--gold)!important;
+}
+#execution-center-content .summary-estimated-cost,
+#execution-center-content .summary-estimated-cost *{
+ color:var(--gold)!important;
+}
+#execution-center-content .vp-flow-title{
+ font-size:12px!important;
+}
+#execution-center-content .vp-bar-label,
+#execution-center-content .vp-bar-value{
+ font-size:15px!important;
+}
+#execution-center-content .summary-estimated-cost > div:last-child,
+#execution-center-content .summary-estimated-cost > div:last-child *{color:var(--text1)!important;}
+#execution-center-content .summary-product,
+#execution-center-content .summary-product *{color:#60a5fa!important;}
+#execution-center-content .summary-data,
+#execution-center-content .summary-data *{color:#4ade80!important;}
+#execution-center-content .summary-distribution,
+#execution-center-content .summary-distribution *{color:#e8c96d!important;}
+#execution-center-content .summary-execution,
+#execution-center-content .summary-execution *{color:#f87171!important;}
+
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(1),
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(1) b{
+  color:#60a5fa !important;
+}
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(2),
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(2) b{
+  color:#4ade80 !important;
+}
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(3),
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(3) b{
+  color:#e8c96d !important;
+}
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(4),
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(4) b{
+  color:#f87171 !important;
+}
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(5),
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(5) b{
+  color:#a78bfa !important;
+}
+
+/* Strong overrides for Stage 6 mirroring stages 1-5 */
+#execution-center-content .summary-team-requirement li{
+  color:#1e3a8a !important;
+  font-size:17px !important;
+  line-height:1.85 !important;
+  font-weight:600 !important;
+}
+#execution-center-content .summary-estimated-cost,
+#execution-center-content .summary-estimated-cost *{
+  color:#e8c96d !important;
+}
+#execution-center-content .summary-estimated-cost > div:first-child{
+  color:#e8c96d !important;
+}
+#execution-center-content .summary-estimated-cost > div:last-child{
+  color:var(--text1) !important;
+  font-size:17px !important;
+  line-height:1.85 !important;
+}
+#execution-center-content .summary-revenue-architecture > div:first-child{
+  color:#e8c96d !important;
+}
+#execution-center-content .summary-revenue-architecture > div:last-child,
+#execution-center-content .summary-revenue-architecture > div:last-child *{
+  color:#7fe3d4 !important;
+  font-weight:800 !important;
+  font-size:17px !important;
+  line-height:1.85 !important;
+}
+#execution-center-content .summary-competitive-moat > div:first-child{
+  color:#e8c96d !important;
+}
+#execution-center-content .summary-competitive-moat > div:last-child,
+#execution-center-content .summary-competitive-moat > div:last-child *{
+  color:var(--text1) !important;
+  font-size:15px !important;
+  line-height:1.75 !important;
+  font-weight:500 !important;
+  text-transform:none !important;
+}
+#execution-center-content .vp-flow-title{
+  font-size:12px !important;
+}
+#execution-center-content .vp-bar-label,
+#execution-center-content .vp-bar-value{
+  font-size:16px !important;
+}
+#execution-center-content .summary-query-snapshot,
+#execution-center-content .summary-query-snapshot *{
+  color:#ffffff !important;
+}
+
+
+/* FINAL USER-SPECIFIC OVERRIDES */
+#s2-revenue > div:nth-child(3) > div:last-child,
+#s2-revenue > div:nth-child(3) > div:last-child *,
+#execution-center-content .summary-competitive-moat > div:last-child,
+#execution-center-content .summary-competitive-moat > div:last-child *{
+  text-transform:none !important;
+  font-size:15px !important;
+  line-height:1.75 !important;
+  font-weight:500 !important;
+  color:var(--text1) !important;
+}
+
+#s2-revenue > div:first-child,
+#execution-center-content .summary-revenue-architecture > div:first-child{
+  color:#e8c96d !important;
+}
+
+#s2-revenue > div:nth-child(2),
+#s2-revenue > div:nth-child(2) *,
+#execution-center-content .summary-revenue-architecture > div:last-child,
+#execution-center-content .summary-revenue-architecture > div:last-child *{
+  color:#7fe3d4 !important;
+  font-weight:800 !important;
+  font-size:17px !important;
+  line-height:1.85 !important;
+}
+
+#s2-team-cost .card:last-child > div:first-child,
+#execution-center-content .summary-estimated-cost > div:first-child{
+  color:#e8c96d !important;
+}
+
+#s2-team-cost .card:last-child > div:last-child,
+#execution-center-content .summary-estimated-cost > div:last-child{
+  color:var(--text1) !important;
+  font-size:17px !important;
+  line-height:1.85 !important;
+}
+
+#execution-center-content .summary-estimated-cost > div:last-child,
+#execution-center-content .summary-estimated-cost > div:last-child *{color:var(--text1)!important;}
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(1),
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(1) b{color:#60a5fa!important;}
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(2),
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(2) b{color:#4ade80!important;}
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(3),
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(3) b{color:#e8c96d!important;}
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(4),
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(4) b{color:#f87171!important;}
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(5),
+#execution-center-content .vp-moat-grid .vp-moat-pill:nth-child(5) b{color:#a78bfa!important;}
+#execution-center-content .summary-product,
+#execution-center-content .summary-product *{color:#60a5fa!important;}
+#execution-center-content .summary-data,
+#execution-center-content .summary-data *{color:#4ade80!important;}
+#execution-center-content .summary-distribution,
+#execution-center-content .summary-distribution *{color:#e8c96d!important;}
+#execution-center-content .summary-execution,
+#execution-center-content .summary-execution *{color:#f87171!important;}
+
+
+/* FINAL STEP 6 SYNC FIXES */
+#execution-center-content .stage-1 .card:nth-child(1) .section-label{color:#ef4444!important;}
+#execution-center-content .stage-1 .card:nth-child(2) .section-label{color:#22c55e!important;}
+#execution-center-content .stage-1 .card:nth-child(3) .section-label{color:#8b5e3c!important;}
+#execution-center-content .stage-1 .card:nth-child(4) .section-label{color:#1e3a8a!important;}
+#execution-center-content .hidden-opportunity p:last-child{color:#c4b5fd!important;}
+#execution-center-content .revenue-architecture p{font-weight:500!important;color:#7fe3d4!important;font-size:17px!important;}
+#execution-center-content .competitive-moat .title{text-transform:uppercase!important;}
+#execution-center-content .competitive-moat p{text-transform:none!important;font-size:15px!important;font-weight:500!important;}
+#execution-center-content .estimated-startup-cost .section-label{color:#e8c96d!important;}
+#execution-center-content canvas + * , #execution-center-content .venture-radar * {font-size:115%!important;}
+#execution-center-content .strength{color:#22c55e!important;}
+#execution-center-content .weakness{color:#f87171!important;}
+#execution-center-content .product-text{color:#e8c96d!important;}
+#execution-center-content .data-text{color:#60a5fa!important;}
+#execution-center-content .distribution-text{color:#4ade80!important;}
+#execution-center-content .execution-text{color:#facc15!important;}
+#execution-center-content .immediate-recommendation .section-label{color:#e8c96d!important;}
+#execution-center-content .recommendation-go{color:#22c55e!important;}
+#execution-center-content .recommendation-iterate{color:#facc15!important;}
+#execution-center-content .recommendation-stop{color:#ef4444!important;}
+
+
+/* === Sources Footer === */
+.vp-sources{margin:22px 48px 0;padding:14px 0 0;border-top:1px solid rgba(232,201,109,.18);font-size:12px;line-height:1.8;color:#cfcfcf}
+.vp-sources b{color:#e8c96d}
+
+</style>
+</head>
+<body>
+<!-- ══ LANDING PAGE ════════════════════════════════════ -->
+<div id="landing">
+<div aria-hidden="true" class="landing-bg">
+<div class="landing-frame landing-frame-a"></div>
+<div class="landing-frame landing-frame-b"></div>
+<span class="landing-star" style="top:14%;left:16%;animation-delay:0s"></span>
+<span class="landing-star" style="top:22%;left:72%;animation-delay:.8s"></span>
+<span class="landing-star" style="top:36%;left:86%;animation-delay:1.6s"></span>
+<span class="landing-star" style="top:68%;left:20%;animation-delay:1.2s"></span>
+<span class="landing-star" style="top:82%;left:76%;animation-delay:2.1s"></span>
+<span class="landing-star" style="top:52%;left:54%;animation-delay:2.8s"></span>
+<span class="landing-star" style="top:74%;left:46%;animation-delay:3.3s"></span>
+<span class="landing-star" style="top:30%;left:30%;animation-delay:3.8s"></span>
+</div>
+<div class="glow-ring"></div>
+<div class="landing-tag">FlowZint 2026 · Open Innovation</div>
+<h1 class="landing-title">Your <em>AI Co-Founder</em><br/>starts here.</h1>
+<p class="landing-sub">Convert any startup idea into a validated business model, execution roadmap, and investor-ready pitch — in under 10 minutes.</p>
+<div class="landing-chips">
+<span class="chip">Problem Intelligence</span>
+<span class="chip">Market Sizing</span>
+<span class="chip">Validation Scoring</span>
+<span class="chip">Roadmap Builder</span>
+<span class="chip">Pitch Deck</span>
+<span class="chip">Venture Verdict</span>
+</div>
+<button class="btn btn-primary" onclick="startApp()" style="font-size:16px;padding:16px 36px">
+    Launch Venture.AI →
+  </button>
+<p style="font-size: 16px; color: var(--text3, #E5A93C); text-shadow: 0px 0px 8px rgba(229, 169, 60, 0.4); margin-top: 16px;">Built with ©Venture.AI Engine · All rights reserved · Created by Dr Naveen Gokul <a href="https://linkedin.com/in/drnaveen06" style="margin-left:8px;color:#0A66C2;font-size:18px;text-decoration:none;vertical-align:middle;" target="_blank"><i class="fab fa-linkedin"></i></a></p>
+</div>
+<!-- ══ LAUNCH MODE CHOICE ═════════════════════════════ -->
+<div class="hidden" id="launch-choice">
+<div class="launch-modal">
+<div class="api-title">Choose how to begin your search query</div>
+<p class="api-sub">Demo mode runs instantly with a built-in venture sample. Live API mode uses your Gemini key and selected model with fallback routing using in-house developed Venture.AI Engine.</p>
+<div class="launch-actions">
+<button class="launch-option launch-demo" onclick="startDemoMode()">
+<div class="launch-option-title">Demo Mode</div>
+<div class="launch-option-copy">Instant sample query with all stages and execution center populated.</div>
+</button>
+<button class="launch-option launch-live" onclick="openLiveApiMode()">
+<div class="launch-option-title">Live API</div>
+<div class="launch-option-copy">Enter your API key, pick a model and generate live responses.</div>
+</button>
+</div>
+<div class="launch-hint">Use Demo Mode for safe testing or Live API for real output.</div>
+</div>
+</div>
+<!-- ══ API KEY SETUP MODAL ═════════════════════════════ -->
+<div class="hidden" id="api-setup">
+<div class="api-modal">
+<div class="api-title">Connect Gemini AI</div>
+<p class="api-sub">Enter your Google Gemini API key to power the AI analysis. Your key is stored only in your browser session and never sent to any server other than Google.</p>
+<div style="margin-bottom:16px">
+<label style="font-size:12px;color:var(--text3);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:8px">Gemini API Key</label>
+<input id="api-key-input" placeholder="AIza..." style="font-family:'JetBrains Mono',monospace" type="text"/>
+</div>
+<div style="margin-bottom:16px">
+<label style="font-size:12px;color:var(--text3);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:8px">Model Mode</label>
+<select id="model-select" style="font-family:'JetBrains Mono',monospace">
+<option value="auto">Auto select by query length</option>
+<option value="models/gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
+<option value="models/gemini-2.0-flash">Gemini 2.0 Flash</option>
+<option value="models/gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
+<option value="models/gemini-2.5-flash">Gemini 2.5 Flash</option>
+<option value="models/gemini-3.0-flash">Gemini 3.0 Flash (Experimental)</option>
+</select>
+</div>
+<div class="error-banner" id="api-error">Invalid API key format. Key should start with "AIza".</div>
+<button class="btn btn-primary" onclick="saveApiKey()" style="width:100%;justify-content:center">Activate Gemini →</button>
+<p style="font-size:12px;color:var(--text3);margin-top:12px;text-align:center">
+      Get a free key at <a href="https://aistudio.google.com" style="color:var(--gold)" target="_blank">aistudio.google.com</a>
+</p>
+</div>
+</div>
+<!-- ══ LOADING OVERLAY ═════════════════════════════════ -->
+<div id="loading-overlay">
+<div class="loader-ring"></div>
+<div class="loader-text" id="loader-text">Analyzing your venture...</div>
+<div class="loader-sub" id="loader-sub">Gemini is thinking</div>
+</div>
+<!-- ══ MAIN APP ════════════════════════════════════════ -->
+<div class="hidden" id="app">
+<!-- Header -->
+<div id="header">
+<div class="logo">
+<div class="logo-mark"><i class="fa-solid fa-brain"></i></div>
+<div class="logo-text">Venture<span>.AI</span></div>
+</div>
+<div class="header-badge">Venture.AI Engine</div>
+</div>
+<!-- Progress -->
+<div id="progress-wrap">
+<div class="step-label" id="step-label">Step 1 of 6</div>
+<div class="progress-track">
+<div class="progress-fill" id="progress-fill" style="width:16.6%"></div>
+</div>
+<div class="step-dots" id="step-dots"></div>
+</div>
+<!-- Stage Container -->
+<div id="stage-wrap">
+<!-- ── STAGE 1: IDEA INPUT ───────────────────────── -->
+<div class="stage active" id="stage-1">
+<div class="stage-hero">
+<div class="stage-tag">Stage 1 · Problem Intelligence</div>
+<h1 class="stage-title">What's your<br/><em>startup idea?</em></h1>
+<p class="stage-desc">Describe the problem you want to solve. Venture.AI will extract core intelligence from your idea.</p>
+</div>
+<div class="output-section">
+<div class="error-banner" id="s1-error"></div>
+<div class="mb16">
+<textarea id="idea-input" placeholder="Describe your startup idea or problem statement..." rows="5" style="min-height:140px"></textarea>
+</div>
+<div id="stage1-actions" style="display:flex;gap:10px;flex-wrap:wrap">
+<button class="btn btn-primary" id="s1-analyze-btn" onclick="runStage1()">Analyze Idea →</button>
+<button class="btn btn-ghost btn-sm" id="s1-load-example-btn" onclick="loadExample()">Load Example</button>
+<button class="btn btn-ghost btn-sm" id="s1-demo-search-btn" onclick="demoSearch()">Demo Search</button>
+</div>
+<div class="hidden" id="stage1-demo-note" style="margin-top:12px;font-size:13px;color:var(--text3)">
+          Demo mode is locked. The sample query is preloaded and you can only proceed through the stages.
+        </div>
+<!-- S1 OUTPUT -->
+<div class="hidden" id="s1-output" style="margin-top:32px">
+<div class="section-label">Intelligence Report</div>
+<div class="grid-2 mb24" id="s1-cards"></div>
+<div class="card card-gold mb24">
+<div class="section-label" style="margin-bottom:12px">Hidden Opportunity</div>
+<div id="s1-opportunity" style="font-size:20px;color:var(--text1);line-height:1.7"></div>
+</div>
+</div>
+</div>
+<div class="stage-footer">
+<div style="font-size:14px;color:var(--text3)">Venture.AI ·
+<div class="vp-golden-footnote">
+  ©Venture.AI Engine · All rights reserved · Created by
+  <a href="https://linkedin.com/in/drnaveen06" target="_blank">Dr Naveen Gokul <i class="fab fa-linkedin" style="margin-left:6px;font-size:15px;"></i></a>
+</div>
+</div>
+<button class="btn btn-primary" disabled="" id="s1-next" onclick="goNext()">Continue to Architect →</button>
+</div>
+</div>
+<!-- ── STAGE 2: VENTURE ARCHITECT ───────────────── -->
+<div class="stage" id="stage-2">
+<div class="stage-hero">
+<div class="stage-tag">Stage 2 · Venture Architect</div>
+<h1 class="stage-title">Building your<br/><em>startup blueprint.</em></h1>
+<p class="stage-desc">Your complete business architecture — from market sizing to MVP to competitive moat.</p>
+</div>
+<div class="output-section">
+<div class="error-banner" id="s2-error"></div>
+<div class="mb24" id="s2-loading-btn">
+<button class="btn btn-primary" onclick="runStage2()">Generate Blueprint →</button>
+</div>
+<div class="hidden" id="s2-output">
+<div class="section-label">Executive Summary</div>
+<div class="card mb24" id="s2-summary"></div>
+<div class="section-label">Market Opportunity</div>
+<div class="grid-3 mb24" id="s2-market"></div>
+<div class="section-label">Revenue Model</div>
+<div class="card mb24" id="s2-revenue"></div>
+<div class="section-label">Competitive Landscape</div>
+<div class="card mb24" style="overflow-x:auto">
+
+<table class="comp-table" id="s2-competitors">
+  <thead>
+    <tr>
+      <th style="color:var(--gold)">Competitor</th>
+      <th style="color:var(--gold)">Strength</th>
+      <th style="color:var(--gold)">Weakness</th>
+      <th style="color:var(--gold)">Gap We Fill</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="color:#f7df8a;font-weight:700">Generic directories</td>
+      <td style="color:#86d4ff">Large listing coverage</td>
+      <td style="color:#ff9a9a">Weak specialization and no workflow depth</td>
+      <td style="color:#6ee7a8;font-weight:700">Dental-first patient routing and trust building</td>
+    </tr>
+    <tr>
+      <td style="color:#f7df8a;font-weight:700">General telehealth apps</td>
+      <td style="color:#86d4ff">Existing user base</td>
+      <td style="color:#ff9a9a">Not optimized for dental care</td>
+      <td style="color:#6ee7a8;font-weight:700">Specialized triage and care coordination</td>
+    </tr>
+    <tr>
+      <td style="color:#f7df8a;font-weight:700">Standalone clinics</td>
+      <td style="color:#86d4ff">Clinical expertise</td>
+      <td style="color:#ff9a9a">Limited discovery and digital reach</td>
+      <td style="color:#6ee7a8;font-weight:700">Networked acquisition and repeat care loop</td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+<div class="section-label">MVP Features</div>
+<div class="card mb24" id="s2-mvp"></div>
+<div class="section-label">Team &amp; Cost Structure</div>
+<div class="grid-2 mb24" id="s2-team-cost"></div>
+</div>
+</div>
+<div class="stage-footer">
+<button class="btn btn-ghost" onclick="goPrev()">← Previous</button>
+<button class="btn btn-primary" disabled="" id="s2-next" onclick="goNext()">Validation Engine →</button>
+<div class="vp-golden-footnote">
+  ©Venture.AI Engine · All rights reserved · Created by
+  <a href="https://linkedin.com/in/drnaveen06" target="_blank">Dr Naveen Gokul <i class="fab fa-linkedin" style="margin-left:6px;font-size:15px;"></i></a>
+</div>
+</div>
+</div>
+<!-- ── STAGE 3: VALIDATION ENGINE ───────────────── -->
+<div class="stage" id="stage-3">
+<div class="stage-hero">
+<div class="stage-tag">Stage 3 · Validation Engine</div>
+<h1 class="stage-title">Is this worth<br/><em>building?</em></h1>
+<p class="stage-desc">AI-powered scoring across 8 critical venture dimensions with success probability analysis.</p>
+</div>
+<div class="output-section">
+<div class="error-banner" id="s3-error"></div>
+<div class="mb24" id="s3-loading-btn">
+<button class="btn btn-primary" onclick="runStage3()">Run Validation →</button>
+</div>
+<div class="hidden" id="s3-output">
+<!-- Verdict -->
+<div class="verdict-block mb24" id="s3-verdict"></div>
+<!-- Scores -->
+<div class="section-label">Dimension Scores</div>
+<div class="score-grid mb24" id="s3-scores"></div>
+<!-- Radar Chart -->
+<div class="section-label">Venture Radar</div>
+<div class="card mb24">
+<div class="chart-wrap" style="max-width:380px">
+<canvas id="radar-chart"></canvas>
+</div>
+</div>
+<!-- SWOT -->
+<div class="section-label">SWOT Analysis</div>
+<div class="swot-grid mb24" id="s3-swot"></div>
+<!-- AI Recommendation -->
+<div class="card card-gold mb24">
+<div class="section-label" style="margin-bottom:12px">AI Recommendation</div>
+<div id="s3-recommendation" style="font-size:15px;color:var(--text1);line-height:1.7"></div>
+</div>
+</div>
+</div>
+<div class="stage-footer">
+<button class="btn btn-ghost" onclick="goPrev()">← Previous</button>
+<button class="btn btn-primary" disabled="" id="s3-next" onclick="goNext()">Build Roadmap →</button>
+<div class="vp-golden-footnote">
+  ©Venture.AI Engine · All rights reserved · Created by
+  <a href="https://linkedin.com/in/drnaveen06" target="_blank">Dr Naveen Gokul <i class="fab fa-linkedin" style="margin-left:6px;font-size:15px;"></i></a></div>
+</div>
+</div>
+<!-- ── STAGE 4: ROADMAP ──────────────────────────── -->
+<div class="stage" id="stage-4">
+<div class="stage-hero">
+<div class="stage-tag">Stage 4 · Execution Roadmap</div>
+<h1 class="stage-title">Your <em>execution</em><br/>master plan.</h1>
+<p class="stage-desc">A realistic 5-phase roadmap with timelines, budgets, KPIs, and milestones.</p>
+</div>
+<div class="output-section">
+<div class="error-banner" id="s4-error"></div>
+<div class="mb24" id="s4-loading-btn">
+<button class="btn btn-primary" onclick="runStage4()">Generate Roadmap →</button>
+</div>
+<div class="hidden" id="s4-output">
+<div class="timeline" id="s4-timeline"></div>
+</div>
+</div>
+<div class="stage-footer">
+<button class="btn btn-ghost" onclick="goPrev()">← Previous</button>
+<button class="btn btn-primary" disabled="" id="s4-next" onclick="goNext()">Build Pitch →</button>
+<div class="vp-golden-footnote">
+  ©Venture.AI Engine · All rights reserved · Created by
+  <a href="https://linkedin.com/in/drnaveen06" target="_blank">Dr Naveen Gokul <i class="fab fa-linkedin" style="margin-left:6px;font-size:15px;"></i></a>
+</div>
+</div>
+</div>
+<!-- ── STAGE 5: PITCH BUILDER ────────────────────── -->
+<div class="stage" id="stage-5">
+<div class="stage-hero">
+<div class="stage-tag">Stage 5 · Pitch Builder</div>
+<h1 class="stage-title">Investor-ready<br/><em>pitch materials.</em></h1>
+<p class="stage-desc">Elevator pitch, full 3-minute pitch, 10-slide deck outline, and anticipated judge Q&amp;A.</p>
+</div>
+<div class="output-section">
+<div class="error-banner" id="s5-error"></div>
+<div class="mb24" id="s5-loading-btn">
+<button class="btn btn-primary" onclick="runStage5()">Generate Pitch →</button>
+</div>
+<div class="hidden" id="s5-output">
+<div class="section-label">Elevator Pitch (30 sec)</div>
+<div class="card card-gold mb24">
+<div id="s5-elevator" style="font-family:'DM Serif Display',serif;font-size:20px;line-height:1.6;color:var(--text1)"></div>
+</div>
+<div class="section-label">3-Minute Pitch</div>
+<div class="card mb24">
+<div id="s5-full" style="font-size:14px;color:var(--text2);line-height:1.8;white-space:pre-line"></div>
+</div>
+<div class="section-label">10-Slide Deck Outline</div>
+<div class="slide-grid mb24" id="s5-slides"></div>
+<div class="section-label">Judge Q&amp;A Prep</div>
+<div id="s5-qa"></div>
+</div>
+</div>
+<div class="stage-footer">
+<button class="btn btn-ghost" onclick="goPrev()">← Previous</button>
+<button class="btn btn-primary" disabled="" id="s5-next" onclick="goNext()">Founder Command Center →</button>
+<div class="vp-golden-footnote">
+  ©Venture.AI Engine · All rights reserved · Created by
+  <a href="https://linkedin.com/in/drnaveen06" target="_blank">Dr Naveen Gokul <i class="fab fa-linkedin" style="margin-left:6px;font-size:15px;"></i></a>
+</div>
+</div>
+</div>
+<!-- ── STAGE 6: FOUNDER COMMAND CENTER ────────────────────── -->
+<div class="stage" id="stage-6">
+<div class="stage-hero">
+<div class="stage-tag">Stage 6 · Founder Command Center</div>
+<h1 class="stage-title">View your<br/><em>venture package.</em></h1>
+<p class="stage-desc">All venture insights generated from your startup query in one unified execution view.</p>
+</div>
+<div class="output-section">
+<div class="card mb24" style="padding:28px">
+<div style="margin-bottom:28px">
+<div class="section-label" style="font-size:20px;margin-bottom:18px">
+<span style="font-size:24px;font-weight:600;letter-spacing:.06em;color:var(--gold);text-shadow:0 0 14px rgba(232,201,109,.14)">COMPLETE VENTURE INTELLIGENCE</span>
+</div>
+</div>
+<div id="vp-stage6-verdict"></div>
+<div id="execution-center-content" style="font-size:20px;line-height:1.9;color:var(--text1)">
+            Your startup intelligence will appear here after all stages are completed.
+          </div>
+</div>
+<div class="card" style="text-align:center;padding:32px">
+<div style="font-family:'DM Serif Display',serif;font-size:24px;color:var(--text1);margin-bottom:8px">Venture.AI</div>
+<div style="font-size:14px;color:#ffffff;margin-bottom:20px">
+            Complete execution intelligence generated from your startup idea
+          </div>
+<button class="btn btn-primary" onclick="resetApp()">Start New Venture ↺</button>
+</div>
+</div>
+<div class="stage-footer">
+<button class="btn btn-ghost" onclick="goPrev()">← Previous</button>
+<div style="font-size:13px;color:var(--text3)">Execution package ready
+<div class="vp-golden-footnote">
+  ©Venture.AI Engine · All rights reserved · Created by
+  <a href="https://linkedin.com/in/drnaveen06" target="_blank">Dr Naveen Gokul <i class="fab fa-linkedin" style="margin-left:6px;font-size:15px;"></i></a>
+</div>
+</div>
+</div>
+</div>
+</div><!-- /stage-wrap -->
+</div><!-- /app -->
+<!-- PDF hidden container -->
+<div id="pdf-container"></div>
+<!-- ══ JAVASCRIPT ══════════════════════════════════════ -->
+<script>
+/* ── STATE ──────────────────────────────────────────── */
+const STATE = {
+  apiKey: '',
+  modelMode: 'auto',
+  demoMode: false,
+  currentStage: 1,
+  idea: '',
+  s1Data: null, s2Data: null, s3Data: null,
+  s4Data: null, s5Data: null,
+};
+let radarChart = null;
+let executionFinancialChart = null;
+let investorMoatChart = null;
+
+const KEYS = {
+  s1:'vp_s1',s2:'vp_s2',s3:'vp_s3',s4:'vp_s4',s5:'vp_s5',
+  meta:'vp_meta', apiKey:'vp_api'
+};
+
+const SLIDE_ICONS = ['🎯','💡','📊','📱','💰','🥊','🚀','📈','👥','🙏'];
+const SLIDE_NAMES = ['Problem','Solution','Market Size','Product','Business Model',
+                     'Competition','Go-to-Market','Financials','Team','The Ask'];
+const SLIDE_TITLE_COLORS = ['#f4c542','#60a5fa','#4ade80','#f472b6','#f59e0b','#a78bfa','#22c55e','#38bdf8','#f87171','#eab308'];
+function slideTitleColor(i){
+  return SLIDE_TITLE_COLORS[i % SLIDE_TITLE_COLORS.length];
+}
+
+/* ── SAFE JSON PARSER ───────────────────────────────── */
+function balanceJsonSnippet(text){
+  const s = String(text || '').replace(/```json/gi,'').replace(/```/g,'').trim();
+  const start = s.search(/[\[{]/);
+  if(start < 0) return s;
+  const open = s[start];
+  const close = open === '{' ? '}' : ']';
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  let end = -1;
+  for(let i=start;i<s.length;i++){
+    const ch = s[i];
+    if(escaped){ escaped = false; continue; }
+    if(ch === '\\'){ escaped = true; continue; }
+    if(ch === '"'){ inString = !inString; continue; }
+    if(inString) continue;
+    if(ch === open) depth++;
+    else if(ch === close){
+      depth--;
+      if(depth === 0){ end = i; break; }
+    }
+  }
+  const snippet = end >= 0 ? s.slice(start, end+1) : s.slice(start);
+  return snippet.replace(/,\s*([}\]])/g,'$1');
+}
+
+function safeJSON(str){
+  const raw = String(str || '');
+  const attempts = [
+    raw,
+    raw.replace(/```json/gi,'').replace(/```/g,'').trim(),
+    balanceJsonSnippet(raw),
+    balanceJsonSnippet(raw.replace(/```json/gi,'').replace(/```/g,'').trim())
+  ].filter(Boolean);
+
+  const tryParse = (s) => { try { return JSON.parse(s); } catch { return null; } };
+
+  for (const candidate of attempts) {
+    const parsed = tryParse(candidate);
+    if (parsed) return parsed;
+  }
+
+  throw new Error('Invalid AI JSON response');
+}
+
+
+function normalizeText(v){
+  if(v == null) return '';
+  if(typeof v === 'string') return v;
+  if(Array.isArray(v)) return v.map(x=>normalizeText(x)).join(' • ');
+  if(typeof v === 'object'){
+    return Object.values(v).flat().map(x=>normalizeText(x)).join(' • ');
+  }
+  return String(v);
+}
+
+function normalizeStage2(d={}){
+  return {
+    executiveSummary: normalizeText(d.executiveSummary),
+    tam: normalizeText(d.tam || d.marketSize?.tam),
+    sam: normalizeText(d.sam || d.marketSize?.sam),
+    som: normalizeText(d.som || d.marketSize?.som),
+    revenueModel: normalizeText(d.revenueModel),
+    moat: normalizeText(d.moat),
+    competitors: Array.isArray(d.competitors) ? d.competitors : [],
+    mvpFeatures: Array.isArray(d.mvpFeatures) ? d.mvpFeatures : [],
+    estimatedStartupCost: normalizeText(d.estimatedStartupCost || d.startupCost),
+    teamRequired: Array.isArray(d.teamRequired) ? d.teamRequired.map(t=>{
+      if(typeof t==='string') return t;
+      if(typeof t==='object' && t){
+        return t.role ? `${t.role}${t.responsibility ? ' — '+t.responsibility : ''}` : Object.values(t).join(' — ');
+      }
+      return String(t);
+    }) : []
+  };
+}
+
+function normalizeStage3(d={}){
+  const scoreKeys = [
+    'market_demand','technical_feasibility','scalability',
+    'revenue_potential','competitive_difficulty',
+    'execution_complexity','regulatory_risk',
+    'investor_attractiveness'
+  ];
+
+  const scores = {};
+  scoreKeys.forEach(key=>{
+    const item = d?.scores?.[key] || {};
+    scores[key] = {
+      score:Number(item.score)||0,
+      reason:item.reason||'No insight available'
+    };
+  });
+
+  return {
+    ...d,
+    scores,
+    swot:d.swot || {
+      strengths:[],
+      weaknesses:[],
+      opportunities:[],
+      threats:[]
+    },
+    recommendation: normalizeText(d.recommendation),
+    verdict:d.verdict || {label:'Pending',probability:0}
+  };
+}
+
+/* ── STORAGE HELPERS ────────────────────────────────── */
+function save(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch(e){}}
+function load(key){try{const r=localStorage.getItem(key);return r?JSON.parse(r):null}catch(e){return null}}
+
+/* ── LANDING / BOOT ─────────────────────────────────── */
+function startApp(){
+  const choice = document.getElementById('launch-choice');
+  if(choice) choice.classList.remove('hidden');
+}
+
+function saveApiKey(){
+  const k = document.getElementById('api-key-input').value.trim();
+  const err = document.getElementById('api-error');
+  if(!k||k.length<10){err.classList.add('show');err.textContent='Please enter a valid API key.';return}
+  err.classList.remove('show');
+  STATE.apiKey = k;
+  STATE.modelMode = normalizeModelId(document.getElementById('model-select')?.value || 'auto');
+  STATE.demoMode = false;
+  save(KEYS.apiKey,k);
+  document.getElementById('api-setup').classList.add('hidden');
+  document.getElementById('launch-choice')?.classList.add('hidden');
+  document.getElementById('landing').classList.add('hidden');
+  showApp();
+}
+
+function showApp(){
+  document.getElementById('app').classList.remove('hidden');
+  buildDots();
+  initializeCleanState();
+}
+
+function initializeCleanState(){
+  STATE.currentStage = 1;
+  STATE.idea = '';
+  STATE.s1Data = null; STATE.s2Data = null; STATE.s3Data = null; STATE.s4Data = null; STATE.s5Data = null;
+  const ideaInput = document.getElementById('idea-input');
+  if(ideaInput){
+    ideaInput.value = '';
+    ideaInput.readOnly = false;
+    ideaInput.classList.remove('demo-locked');
+  }
+  setStage1DemoLock(false);
+  ['s1-output','s2-output','s3-output','s4-output','s5-output'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.add('hidden');
+  });
+  ['s1-next','s2-next','s3-next','s4-next','s5-next'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.disabled = true;
+  });
+  const ec = document.getElementById('execution-center-content');
+  if(ec) ec.innerHTML = '';
+  updateProgress(1);
+}
+
+/* ── PROGRESS ───────────────────────────────────────── */
+function buildDots(){
+  const wrap=document.getElementById('step-dots');
+  wrap.innerHTML='';
+  for(let i=1;i<=6;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');d.textContent=i;d.id='dot-'+i;
+    wrap.appendChild(d);
+  }
+}
+function updateProgress(n){
+  STATE.currentStage=n;
+  const stepLabel=document.getElementById('step-label');
+  if(stepLabel){
+    stepLabel.textContent=`Step ${n} of 6`;
+    const stepColors=['#e8c96d','#60a5fa','#4ade80','#fbbf24','#f472b6','#a78bfa'];
+    stepLabel.style.color=stepColors[n-1] || '#60a5fa';
+  }
+  document.getElementById('progress-fill').style.width=`${(n/6)*100}%`;
+  for(let i=1;i<=6;i++){
+    const d=document.getElementById('dot-'+i);
+    d.className='dot'+(i<n?'done':i===n?'active':'');
+  }
+  document.querySelectorAll('.stage').forEach(s=>s.classList.remove('active'));
+  document.getElementById('stage-'+n).classList.add('active');
+  if(STATE.demoMode) renderDemoStage(n);
+  if(n===6) renderExecutionCenter();
+  window.scrollTo(0,0);
+  if(STATE.currentStage===6){setTimeout(renderVentureVerdict,150);}
+  save(KEYS.meta,{currentStage:n,savedAt:Date.now()});
+}
+function goNext(){
+  const next = Math.min(6, STATE.currentStage + 1);
+
+  // Auto-render demo stages so buttons never dead-end
+  if(STATE.demoMode){
+    if(next === 2 && STATE.s2Data){
+      renderS2(STATE.s2Data);
+      document.getElementById('s2-output')?.classList.remove('hidden');
+      const b=document.getElementById('s2-next'); if(b) b.disabled=false;
+    }
+    if(next === 3 && STATE.s3Data){
+      renderS3(STATE.s3Data);
+      document.getElementById('s3-output')?.classList.remove('hidden');
+      const b=document.getElementById('s3-next'); if(b) b.disabled=false;
+    }
+    if(next === 4 && STATE.s4Data){
+      renderS4(STATE.s4Data);
+      document.getElementById('s4-output')?.classList.remove('hidden');
+      const b=document.getElementById('s4-next'); if(b) b.disabled=false;
+    }
+    if(next === 5 && STATE.s5Data){
+      renderS5(STATE.s5Data);
+      document.getElementById('s5-output')?.classList.remove('hidden');
+      const b=document.getElementById('s5-next'); if(b) b.disabled=false;
+    }
+    if(next === 6){
+      renderExecutionCenter();
+    }
+  }
+
+  updateProgress(next)
+}
+function goPrev(){updateProgress(STATE.currentStage-1)}
+
+/* ── LOADER ─────────────────────────────────────────── */
+function showLoader(text,sub){
+  document.getElementById('loader-text').textContent=text||'Processing...';
+  document.getElementById('loader-sub').textContent=sub||'Gemini is thinking';
+  document.getElementById('loading-overlay').classList.add('show');
+}
+function hideLoader(){document.getElementById('loading-overlay').classList.remove('show')}
+function showError(id,msg){
+  const el=document.getElementById(id);
+  el.textContent=msg;el.classList.add('show');
+}
+function clearError(id){document.getElementById(id).classList.remove('show')}
+
+
+function escapeHTML(value){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/\"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+function renderRichText(value, { inline = false } = {}){
+  let s = String(value ?? '').replace(/\r\n/g,'\n').trim();
+  if(!s) return inline ? '' : '<div style="font-size:16px;color:var(--text2);line-height:1.8">Not available yet.</div>';
+
+  s = escapeHTML(s)
+    .replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
+
+  // Normalize markdown-style separators and bullet fragments.
+  // This turns inline "* item" fragments into readable separate lines while
+  // preserving bold headings like **Fee-for-Service**.
+  s = s.replace(/\s+\*\s+(?=[A-Za-z0-9(])/g, '\n• ');
+  s = s.replace(/\*/g, '');
+  s = s.replace(/\s{2,}/g, ' ');
+
+  const lines = s.split('\n').map(line => line.trim()).filter(Boolean);
+  const blocks = [];
+  let listType = null;
+  let listItems = [];
+
+  const flushList = () => {
+    if(!listItems.length) return;
+    const tag = listType === 'ol' ? 'ol' : 'ul';
+    blocks.push(`<${tag} class="vp-rich-list">${listItems.map(item => `<li>${item}</li>`).join('')}</${tag}>`);
+    listItems = [];
+    listType = null;
+  };
+
+  for(const line of lines){
+    const bullet = line.match(/^[-•]\s+(.*)$/);
+    const numbered = line.match(/^(\d+)\.\s+(.*)$/);
+    if(bullet){
+      if(listType && listType !== 'ul') flushList();
+      listType = 'ul';
+      listItems.push(bullet[1]);
+      continue;
+    }
+    if(numbered){
+      if(listType && listType !== 'ol') flushList();
+      listType = 'ol';
+      listItems.push(numbered[2]);
+      continue;
+    }
+    flushList();
+    blocks.push(`<p>${line}</p>`);
+  }
+  flushList();
+
+  const html = blocks.join('');
+  return inline ? html.replace(/^<p>|<\/p>$/g, '') : html;
+}
+
+function listHTML(items, cls='bullet', itemStyle=''){
+  const arr = Array.isArray(items) ? items : [];
+  if(!arr.length) return `<div style="font-size:16px;color:var(--text2);line-height:1.8">Not available yet.</div>`;
+  return `<ul class="${cls}">` + arr.map(item => `<li${itemStyle ? ` style="${itemStyle}"` : ''}>${renderRichText(item, { inline: true })}</li>`).join('') + `</ul>`;
+}
+
+function cardHTML(title, body, accent='var(--gold)'){
+  return `
+    <div class="card" style="border-color:${accent}33;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${accent};margin-bottom:10px">${escapeHTML(title)}</div>
+      <div style="font-size:16px;color:var(--text1);line-height:1.85">${body}</div>
+    </div>`;
+}
+
+
+function makeBarRow(label, value, accent){
+  const pct = valueToPercent(value);
+  const accentMap = {gold:'var(--gold)', blue:'var(--blue)', green:'var(--green)'};
+  return `<div class="vp-bar-row">
+    <div class="vp-bar-label" style="
+color:${
+  label === 'TAM' ? '#f4c542' :
+  label === 'SAM' ? '#60a5fa' :
+  label === 'SOM' ? '#4ade80' :
+  'var(--gold)'
+}">
+${escapeHTML(label)}
+</div>
+    <div class="vp-bar-track"><div class="vp-bar-fill" style="width:${pct}%;background:${accentMap[accent] || 'var(--gold)'}"></div></div>
+    <div class="vp-bar-value">${pct}%</div>
+  </div>`;
+}
+function valueToPercent(value){
+  const str = String(value ?? '').toLowerCase();
+  const nums = (str.match(/\d+(?:\.\d+)?/g) || []).map(Number);
+  if(!nums.length) return 34;
+  const max = Math.max(...nums);
+  const min = Math.min(...nums);
+  const scale = Math.max(max, min);
+  if (/billion|bn/i.test(str)) return Math.max(10, Math.min(100, Math.round(scale >= 10 ? 100 : scale * 10)));
+  if (/million|m/i.test(str)) return Math.max(10, Math.min(100, Math.round(scale >= 100 ? 100 : scale / 10)));
+  if (/k|thousand/i.test(str)) return Math.max(10, Math.min(100, Math.round(scale / 10)));
+  if (scale <= 10) return Math.max(10, Math.min(100, Math.round(scale * 10)));
+  return Math.max(10, Math.min(100, Math.round(Math.min(scale, 100))));
+}
+
+
+
+
+function parseMoneyValue(text){
+  const raw = String(text ?? '').toLowerCase().replace(/,/g,' ').replace(/\s+/g,' ');
+  const pairs = [...raw.matchAll(/(?:₹|\$|inr|rs\.?|usd)?\s*([\d.]+)\s*(crores?|crore|cr|lakhs?|lakh|million|millions|m|billion|billions|bn|thousand|thousands|k)?/gi)];
+  let best = 0;
+
+  for(const m of pairs){
+    const num = parseFloat(m[1]);
+    if(!Number.isFinite(num)) continue;
+    const unit = (m[2] || '').toLowerCase();
+    let val = num;
+    if(unit.includes('crore') || unit === 'cr') val = num * 10000000;
+    else if(unit.includes('lakh')) val = num * 100000;
+    else if(unit.includes('billion') || unit === 'bn') val = num * 1000000000;
+    else if(unit.includes('million') || unit === 'm') val = num * 1000000;
+    else if(unit.includes('thousand') || unit === 'k') val = num * 1000;
+    best = Math.max(best, val);
+  }
+
+  if(best) return best;
+
+  const nums = (raw.match(/\d+(?:\.\d+)?/g) || []).map(Number).filter(Number.isFinite);
+  if(!nums.length) return 0;
+  return Math.max(...nums);
+}
+
+function formatCompactMoney(value){
+  const n = Number(value || 0);
+  if(!Number.isFinite(n) || n <= 0) return '—';
+  if(n >= 1000000000) return `₹${(n/1000000000).toFixed(n>=10000000000?0:1)}B`;
+  if(n >= 10000000) return `₹${(n/10000000).toFixed(n>=100000000?0:1)}Cr`;
+  if(n >= 100000) return `₹${(n/100000).toFixed(n>=1000000?0:1)}L`;
+  if(n >= 1000) return `₹${(n/1000).toFixed(n>=10000?0:1)}K`;
+  return `₹${Math.round(n)}`;
+}
+
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+function buildFinancialProjection(){
+  const costSeed = parseMoneyValue(STATE.s2Data?.estimatedStartupCost || '');
+  const probability = Number(STATE.s3Data?.probability ?? 58);
+  const riskBoost = clamp(probability, 20, 95) / 100;
+
+  const baseCost = costSeed > 0 ? costSeed : 2500000;
+  const baseRevenue = Math.max(baseCost * (0.55 + riskBoost * 0.8), 1200000);
+
+  const labels = ['Q1','Q2','Q3','Q4','Q5','Q6'];
+  const revenue = labels.map((_, i) => Math.round(baseRevenue * (0.75 + i * (0.35 + riskBoost * 0.18))));
+  const cost = labels.map((_, i) => Math.round(baseCost * (1 + i * 0.12)));
+  const profit = revenue.map((r, i) => r - cost[i]);
+
+  return { labels, revenue, cost, profit, baseCost, baseRevenue, probability };
+}
+
+function buildMoatProfile(){
+  const s2 = STATE.s2Data || {};
+  const s3 = STATE.s3Data || {};
+  const scores = s3.scores || {};
+
+  const tech = Number(scores.technical_feasibility?.score ?? 6.4);
+  const scale = Number(scores.scalability?.score ?? 6.8);
+  const revenue = Number(scores.revenue_potential?.score ?? 6.6);
+  const investor = Number(scores.investor_attractiveness?.score ?? 6.7);
+  const difficulty = Number(scores.competitive_difficulty?.score ?? 5.8);
+  const exec = Number(scores.execution_complexity?.score ?? 5.5);
+  const demand = Number(scores.market_demand?.score ?? 7.0);
+
+  const productMoat = clamp(Math.round(tech * 10 + (s2.moat ? 8 : 0)), 20, 98);
+  const dataMoat = clamp(Math.round(demand * 8 + (STATE.s1Data?.painPoints?.length || 0) * 6), 18, 96);
+  const distributionMoat = clamp(Math.round(scale * 10 + investor * 2), 20, 97);
+  const brandMoat = clamp(Math.round(revenue * 7 + investor * 4), 18, 94);
+  const executionMoat = clamp(Math.round((10 - exec) * 9 + (10 - difficulty) * 4), 16, 92);
+
+  return {
+    labels: ['Product','Data','Distribution','Brand','Execution'],
+    values: [productMoat, dataMoat, distributionMoat, brandMoat, executionMoat]
+  };
+}
+
+function destroyExecutionCharts(){
+  if(executionFinancialChart){ executionFinancialChart.destroy(); executionFinancialChart = null; }
+  if(investorMoatChart){ investorMoatChart.destroy(); investorMoatChart = null; }
+}
+
+function renderExecutionCharts(){
+  const financialCanvas = document.getElementById('vp-financial-chart');
+  const moatCanvas = document.getElementById('vp-moat-chart');
+  if(!financialCanvas && !moatCanvas) return;
+
+  destroyExecutionCharts();
+
+  if(financialCanvas && window.Chart){
+    const fp = buildFinancialProjection();
+    executionFinancialChart = new Chart(financialCanvas.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: fp.labels,
+        datasets: [
+          {
+            label: 'Revenue',
+            data: fp.revenue,
+            borderColor: '#e8c96d',
+            backgroundColor: 'rgba(232,201,109,0.12)',
+            tension: 0.32,
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 5,
+          },
+          {
+            label: 'Cost',
+            data: fp.cost,
+            borderColor: '#60a5fa',
+            backgroundColor: 'rgba(96,165,250,0.12)',
+            tension: 0.32,
+            fill: false,
+            pointRadius: 4,
+            pointHoverRadius: 5,
+          },
+          {
+            label: 'Profit',
+            data: fp.profit,
+            borderColor: '#4ade80',
+            backgroundColor: 'rgba(74,222,128,0.12)',
+            tension: 0.32,
+            fill: false,
+            pointRadius: 4,
+            pointHoverRadius: 5,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#f2f0ea',
+              boxWidth: 10,
+              usePointStyle: true
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: ${formatCompactMoney(ctx.parsed.y)}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#c8c5bb' },
+            grid: { color: 'rgba(255,255,255,0.05)' }
+          },
+          y: {
+            ticks: {
+              color: '#c8c5bb',
+              callback: (v) => formatCompactMoney(v)
+            },
+            grid: { color: 'rgba(255,255,255,0.05)' }
+          }
+        }
+      }
+    });
+  }
+
+  if(moatCanvas && window.Chart){
+    const mp = buildMoatProfile();
+    investorMoatChart = new Chart(moatCanvas.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: mp.labels,
+        datasets: [{
+          data: mp.values,
+          backgroundColor: [
+            '#e8c96d',
+            '#60a5fa',
+            '#4ade80',
+            '#a78bfa',
+            '#fbbf24'
+          ],
+          borderColor: '#0d0d14',
+          borderWidth: 4,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '58%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#f2f0ea',
+              boxWidth: 10,
+              usePointStyle: true
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.label}: ${ctx.parsed}%`
+            }
+          }
+        }
+      }
+    });
+  }
+}
+
+function renderExecutionCenter(){
+  if(!STATE.s2Data) STATE.s2Data = {};
+  if(!STATE.s3Data) STATE.s3Data = {};
+  if(!STATE.s4Data) STATE.s4Data = { phases: [] };
+  if(!STATE.s5Data) STATE.s5Data = {};
+
+  const el = document.getElementById('execution-center-content');
+  if(!el) return;
+
+  const query = STATE.idea || STATE.s1Data?.rawIdea || '';
+  const hasAnyStage = !!(STATE.s1Data || STATE.s2Data || STATE.s3Data || STATE.s4Data || STATE.s5Data);
+  const progress = [
+    { step:'1', title:'Query', text: query || 'Enter your startup idea to begin.' },
+    { step:'2', title:'Problem', text: STATE.s1Data?.problem || 'Waiting for Stage 1.' },
+    { step:'3', title:'Architecture', text: STATE.s2Data?.executiveSummary || 'Waiting for Stage 2.' },
+    { step:'4', title:'Validation', text: STATE.s3Data?.verdict?.label ? `${STATE.s3Data.verdict.label} · ${STATE.s3Data.probability}%` : 'Waiting for Stage 3.' },
+    { step:'5', title:'Roadmap', text: STATE.s4Data?.phases?.[0]?.name || 'Waiting for Stage 4.' },
+    { step:'6', title:'Pitch', text: STATE.s5Data?.elevatorPitch || 'Waiting for Stage 5.' }
+  ];
+
+  const flow = progress.map((item, idx) => `
+    <div class="vp-flow-node">
+      <div class="vp-flow-step">${escapeHTML(item.step)}</div>
+      <div class="vp-flow-title">${escapeHTML(item.title)}</div>
+      <div class="vp-flow-copy">${escapeHTML(item.text)}</div>
+    </div>
+    ${idx < progress.length - 1 ? '<div style="display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gold);font-weight:900">→</div>' : ''}
+  `).join('');
+
+  const flowWrap = `
+    <section class="card" style="margin-bottom:18px">
+      <div style="font-size:16px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:14px">Query to Execution Flow</div>
+      <div class="vp-flow">${flow}</div>
+    </section>`;
+
+  const querySection = `
+    <section class="card" style="margin-bottom:18px">
+      <div style="font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:14px">Startup Query</div>
+      <div class="card card-sm" style="background:rgba(255,255,255,0.03)">
+        <div style="font-size:16px;line-height:1.9;color:var(--text1)">${escapeHTML(query || 'No query entered yet.')}</div>
+      </div>
+    </section>`;
+
+  
+  const chartBlock = (STATE.s2Data?.tam || STATE.s2Data?.sam || STATE.s2Data?.som || STATE.s3Data?.probability) ? `
+  <section class="card" style="margin-bottom:18px">
+    <div class="vp-visual-grid">
+      <div class="vp-chart-card">
+        <div class="vp-chart-title">Market Opportunity Map</div>
+        <div class="vp-chart-wrap"><canvas id="executionMarketChart"></canvas></div>
+      </div>
+      <div class="vp-chart-card">
+        <div class="vp-chart-title">Investor Readiness</div>
+        <div class="vp-gauge" style="--pct:${Number(STATE.s3Data?.probability||0)}">
+          <span>${Number(STATE.s3Data?.probability||0)}%</span>
+        </div>
+        <div style="margin-top:14px;font-size:14px;color:var(--text2);text-align:center">
+          ${escapeHTML(STATE.s3Data?.verdict?.label || 'Pending')}
+        </div>
+      </div>
+    </div>
+  </section>` : '';
+
+const summarySections = [];
+
+  if(!query && !hasAnyStage){
+    el.innerHTML = '<div style="font-size:16px;color:var(--text2);line-height:1.8">Run a search or load an example to generate the execution center.</div>';
+    return;
+  }
+
+  if(STATE.s1Data){
+    summarySections.push(`
+      <section class="card" style="margin-bottom:18px">
+        <div style="font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:14px">Stage 1 · Problem Intelligence</div>
+        <div class="grid-2" style="gap:14px;margin-bottom:14px">
+          <div class="card card-sm" style="background:rgba(255,255,255,0.03)">
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#ef4444;margin-bottom:8px">Core Problem</div>
+            <div style="font-size:16px;line-height:1.85">${renderRichText(STATE.s1Data.problem||'')}</div>
+          </div>
+          <div class="card card-sm" style="background:rgba(255,255,255,0.03)">
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#22c55e;margin-bottom:8px">Target Users</div>
+            <div style="font-size:16px;line-height:1.85">${renderRichText(STATE.s1Data.targetUsers||'')}</div>
+          </div>
+        </div>
+        <div class="grid-2" style="gap:14px;margin-bottom:14px">
+          <div class="card card-sm" style="background:rgba(255,255,255,0.03)">
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8b5e3c;margin-bottom:8px">Industry · Geography</div>
+            <div style="font-size:16px;line-height:1.85">${renderRichText((STATE.s1Data.industry||'') + (STATE.s1Data.geography ? ' · ' + STATE.s1Data.geography : ''))}</div>
+          </div>
+          <div class="card card-sm" style="background:rgba(255,255,255,0.03)">
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#1e3a8a;margin-bottom:8px">Why Now</div>
+            <div style="font-size:16px;line-height:1.85">${renderRichText(STATE.s1Data.urgency||'')}</div>
+          </div>
+        </div>
+        <div class="card card-gold" style="margin-bottom:0">
+          <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">Hidden Opportunity</div>
+          <div style="font-size:16px;line-height:1.9;color:var(--text1)">${listHTML(STATE.s1Data.painPoints)}<p style="margin-top:12px;color:#c4b5fd">${renderRichText(STATE.s1Data.hiddenOpportunity||'', { inline: true })}</p></div>
+        </div>
+      </section>`);
+  }
+
+  if(STATE.s2Data){
+    const competitors = Array.isArray(STATE.s2Data.competitors) ? STATE.s2Data.competitors : [];
+    summarySections.push(`
+      <section class="card" style="margin-bottom:18px">
+        <div style="font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:14px">Stage 2 · Venture Architecture</div>
+        <div class="card" style="margin-bottom:14px">
+          <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#ff8fd1;margin-bottom:8px">Executive Summary</div>
+          <div style="font-size:16px;line-height:1.9;color:var(--text1)">${renderRichText(STATE.s2Data.executiveSummary||'')}</div>
+        </div>
+        <div class="grid-3" style="margin-bottom:14px">
+          <div class="card card-sm"><div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:8px">TAM</div><div style="font-size:16px;line-height:1.8">${escapeHTML(STATE.s2Data.tam||'')}</div></div>
+          <div class="card card-sm"><div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px">SAM</div><div style="font-size:16px;line-height:1.8">${escapeHTML(STATE.s2Data.sam||'')}</div></div>
+          <div class="card card-sm"><div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">SOM</div><div style="font-size:16px;line-height:1.8">${escapeHTML(STATE.s2Data.som||'')}</div></div>
+        </div>
+        <div class="card" style="overflow:auto;margin-bottom:14px">
+          <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#cfa94a;margin-bottom:10px">Competitors</div>
+          <table class="comp-table">
+            <thead><tr><th>Competitor</th><th>Strength</th><th>Weakness</th><th>Gap We Fill</th></tr></thead>
+            <tbody>
+              ${competitors.map(c => `<tr><td class="comp-name">${escapeHTML(c.name||'')}</td><td style="color:#22c55e">${escapeHTML(c.strength||'')}</td><td style="color:#f87171">${escapeHTML(c.weakness||'')}</td><td class="comp-gap">${escapeHTML(c.gap||'')}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid-2" style="gap:14px;margin-bottom:14px">
+          <div class="card card-sm summary-revenue-architecture" style="background:rgba(255,255,255,0.03)">
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Revenue Architecture</div>
+            <div style="font-size:16px;line-height:1.85;font-weight:700;color:#7fe3d4">${renderRichText(STATE.s2Data.revenueModel||'')}</div>
+          </div>
+          <div class="card card-sm summary-competitive-moat" style="background:rgba(255,255,255,0.03)">
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">COMPETITIVE MOAT</div>
+            <div style="font-size:15px;line-height:1.75;text-transform:none;font-weight:500">${renderRichText(STATE.s2Data.moat||'')}</div>
+          </div>
+        </div>
+
+        <div class="grid-3" style="gap:14px;margin-bottom:14px">
+          <div class="card card-sm summary-mvp-features" style="background:rgba(255,255,255,0.03)">
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">MVP Feature Set</div>
+            ${listHTML(STATE.s2Data.mvpFeatures, 'bullet', 'color:#d8c8ff!important;font-weight:600!important')}
+          </div>
+          <div class="card card-sm summary-team-requirement" style="background:rgba(255,255,255,0.03)">
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Team Requirement</div>
+            ${listHTML(STATE.s2Data.teamRequired, 'bullet', 'color:#1e3a8a!important;font-weight:600!important')}
+          </div>
+          <div class="card card-sm summary-estimated-cost" style="background:rgba(255,255,255,0.03)">
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Estimated Startup Cost</div>
+            <div style="font-size:16px;line-height:1.85;color:var(--text1)">${renderRichText(STATE.s2Data.estimatedStartupCost||'')}</div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="gap:14px">
+          <div class="card card-sm">
+            <div class="vp-section-note">Market Snapshot</div>
+            <div class="vp-mini-bars">
+              ${makeBarRow('TAM', STATE.s2Data.tam, 'gold')}
+              ${makeBarRow('SAM', STATE.s2Data.sam, 'blue')}
+              ${makeBarRow('SOM', STATE.s2Data.som, 'green')}
+            </div>
+          </div>
+          <div class="card card-sm" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px">
+            <div class="vp-section-note">Execution Readiness</div>
+            <div class="vp-gauge" style="--pct:${STATE.s3Data?.probability ?? 0}">
+              <span>${STATE.s3Data?.probability ?? 0}%</span>
+            </div>
+            <div style="font-size:15px;line-height:1.75;color:var(--text2);text-align:center">
+              ${STATE.s3Data?.verdict?.label ? escapeHTML(STATE.s3Data.verdict.label) : 'Validation pending'}
+            </div>
+          </div>
+        </div>
+      </section>`);
+  }
+
+  if(STATE.s3Data){
+    const scores = STATE.s3Data.scores || {};
+    const sw = STATE.s3Data.swot || {};
+    summarySections.push(`
+      <section class="card" style="margin-bottom:18px">
+        <div style="font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:14px">Stage 3 · Validation Engine</div>
+        <div class="verdict-block" style="margin-bottom:14px">
+          <div class="verdict-label">Venture Verdict</div>
+          <div class="verdict-text" style="color:${STATE.s3Data.verdict?.color || 'var(--gold)'}">${escapeHTML(STATE.s3Data.verdict?.label || 'PIVOT')}</div>
+          <div class="verdict-prob">Success Probability: <span style="color:${STATE.s3Data.verdict?.color || 'var(--gold)'}">${escapeHTML(STATE.s3Data.probability ?? '')}%</span></div>
+        </div>
+        <div class="score-grid" style="margin-bottom:14px">
+          ${Object.entries(scores).map(([k,v]) => `
+            <div class="score-card">
+              <div class="score-label">${escapeHTML(k.replace(/_/g,' '))}</div>
+              <div class="score-number">${Number(v?.score ?? 0).toFixed(1)}</div>
+              <div class="score-bar"><div class="score-fill" style="width:${Math.max(0,Math.min(100,Number(v?.score ?? 0)*10))}%"></div></div>
+              <div class="score-reason">${escapeHTML(v?.reason||'')}</div>
+            </div>`).join('')}
+        </div>
+        <div class="swot-grid" style="margin-bottom:14px">
+          <div class="swot-cell swot-s"><div class="swot-head">Strengths</div>${listHTML(sw.strengths, 'swot-list', 'color:#86efac;font-weight:600')}</div>
+          <div class="swot-cell swot-w"><div class="swot-head">Weaknesses</div>${listHTML(sw.weaknesses, 'swot-list', 'color:#fda4af;font-weight:600')}</div>
+          <div class="swot-cell swot-o"><div class="swot-head">Opportunities</div>${listHTML(sw.opportunities, 'swot-list', 'color:#93c5fd;font-weight:600')}</div>
+          <div class="swot-cell swot-t"><div class="swot-head">Threats</div>${listHTML(sw.threats, 'swot-list', 'color:#fdba74;font-weight:600')}</div>
+        </div>
+        <div class="card card-gold">
+          <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">AI Recommendation</div>
+          <div style="font-size:17px;line-height:1.9;color:var(--green);font-weight:600">${renderRichText(STATE.s3Data.recommendation||'')}</div>
+        </div>
+      </section>`);
+  }
+
+  if(STATE.s4Data){
+    const phases = Array.isArray(STATE.s4Data.phases) ? STATE.s4Data.phases : [];
+    summarySections.push(`
+      <section class="card" style="margin-bottom:18px">
+        <div style="font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:14px">Stage 4 · Execution Roadmap</div>
+        <div class="timeline" style="padding-left:28px">
+          ${phases.map(p => `
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-phase">${escapeHTML(p.phase||'Phase')}</div>
+              <div class="tl-title">${renderRichText(p.name||'', { inline: true })}</div>
+              <div class="tl-meta">
+                <span class="tl-tag">⏱ ${escapeHTML(p.duration||'')}</span>
+                <span class="tl-tag">💰 ${escapeHTML(p.budget||'')}</span>
+                <span class="tl-tag">👥 ${escapeHTML(p.team||'')}</span>
+              </div>
+              <div class="tl-body"><strong style="color:var(--text1)">Deliverables:</strong> ${renderRichText((Array.isArray(p.deliverables)?p.deliverables.join(' · '):''))}</div>
+              <div class="kpi-list">${(Array.isArray(p.kpis)?p.kpis:[]).map(k => `<span class="kpi-chip">${escapeHTML(k)}</span>`).join('')}</div>
+              ${p.risk ? `<div class="risk-pill">⚠ ${escapeHTML(p.risk)}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </section>`);
+  }
+
+  if(STATE.s5Data){
+    const slides = Array.isArray(STATE.s5Data.slides) ? STATE.s5Data.slides : [];
+    const qa = Array.isArray(STATE.s5Data.qa) ? STATE.s5Data.qa : [];
+    summarySections.push(`
+      <section class="card" style="margin-bottom:0">
+        <div style="font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:14px">Stage 5 · Pitch Builder</div>
+        <div class="grid-2" style="gap:14px;margin-bottom:14px">
+          <div class="card card-gold">
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Elevator Pitch</div>
+            <div style="font-size:18px;line-height:1.9;color:var(--text1);font-family:'DM Serif Display',serif">${renderRichText(STATE.s5Data.elevatorPitch||'')}</div>
+          </div>
+          <div class="card">
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">3-Minute Pitch</div>
+            <div style="font-size:17px;line-height:1.9;color:var(--blue);white-space:pre-line">${renderRichText(STATE.s5Data.fullPitch||'')}</div>
+          </div>
+        </div>
+        <div class="section-label">10-Slide Deck Outline</div>
+        <div class="slide-grid" style="margin-bottom:14px">
+          ${slides.map((s,i)=>`
+            <div class="slide-card">
+              <div class="slide-num">${String(i+1).padStart(2,'0')}</div>
+              <div class="slide-icon">${SLIDE_ICONS[i] || '📌'}</div>
+              <div class="slide-name" style="color:${slideTitleColor(i)};font-size:19px;font-weight:700;letter-spacing:0.01em">${renderRichText(s.title || SLIDE_NAMES[i] || 'Slide', { inline: true })}</div>
+              ${listHTML(s.bullets)}
+            </div>`).join('')}
+        </div>
+        <div class="section-label">Judge Q&A Prep</div>
+        ${qa.map(q=>`
+          <div class="qa-card">
+            <div class="qa-question">Q: ${renderRichText(q.question||'', { inline: true })}</div>
+            <div class="qa-answer">${renderRichText(q.answer||'')}</div>
+          </div>`).join('')}
+      </section>`);
+  }
+
+  const visuals = [];
+  if (STATE.s2Data) {
+    visuals.push(`
+      <div class="card card-sm" style="margin-bottom:14px">
+        <div class="vp-section-note">Market Visual</div>
+        <div class="vp-mini-bars">
+          ${makeBarRow('TAM', STATE.s2Data.tam, 'gold')}
+          ${makeBarRow('SAM', STATE.s2Data.sam, 'blue')}
+          ${makeBarRow('SOM', STATE.s2Data.som, 'green')}
+        </div>
+      </div>`);
+  }
+  if (STATE.s3Data) {
+    visuals.push(`
+      <div class="card card-sm" style="margin-bottom:14px">
+        <div class="vp-section-note">Validation Gauge</div>
+        <div style="display:flex;align-items:center;justify-content:center">
+          <div class="vp-gauge" style="--pct:${STATE.s3Data.probability ?? 0}">
+            <span>${STATE.s3Data.probability ?? 0}%</span>
+          </div>
+        </div>
+      </div>`);
+  }
+
+  if (STATE.s2Data || STATE.s3Data || STATE.s4Data || STATE.s5Data) {
+    visuals.push(`
+      <section class="card" style="margin-bottom:18px">
+        <div class="vp-section-note">Auto-generated Financial Visuals</div>
+        <div class="vp-visual-grid">
+          <div class="vp-chart-card">
+            <div class="vp-chart-title">Revenue vs Cost Projection</div>
+            <div class="vp-chart-wrap"><canvas id="vp-financial-chart"></canvas></div>
+          </div>
+          <div class="vp-chart-card">
+            <div class="vp-chart-title">Investor Moat Profile</div>
+            <div class="vp-chart-wrap"><canvas id="vp-moat-chart"></canvas></div>
+            <div class="vp-moat-grid">
+              <div class="vp-moat-pill"><b>Product</b><br>Feature strength and unique product depth.</div>
+              <div class="vp-moat-pill"><b>Data</b><br>Insight advantage from user and workflow signals.</div>
+              <div class="vp-moat-pill"><b>Distribution</b><br>Channel reach and repeat acquisition potential.</div>
+              <div class="vp-moat-pill"><b>Execution</b><br>Team speed, roadmap clarity and delivery control.</div>
+            </div>
+          </div>
+        </div>
+      </section>`);
+  }
+
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:18px;padding:24px">
+      <div style="font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:12px">Query Snapshot</div>
+      <div style="font-size:18px;line-height:1.9;color:var(--text1)">${escapeHTML(query || 'No startup query entered yet.')}</div>
+    </div>
+    ${flowWrap}
+    ${querySection}
+    ${visuals.join('')}
+    <section class="card" style="margin-bottom:18px">
+          ${summarySections.length ? summarySections.join('') : `<div class="card" style="padding:28px"><div style="font-size:16px;line-height:1.8;color:var(--text2)">Complete all stages to generate the execution center.</div></div>`}
+  `;
+
+  renderExecutionCharts();
+}
+/* ── GEMINI API CALL ────────────────────────────────── */
+const MODEL_LIBRARY = {
+  auto: { label: 'Auto', id: 'auto' },
+  'models/gemini-2.0-flash-lite': { label: 'Gemini 2.0 Flash-Lite', id: 'models/gemini-2.0-flash-lite' },
+  'models/gemini-2.0-flash': { label: 'Gemini 2.0 Flash', id: 'models/gemini-2.0-flash' },
+  'models/gemini-2.5-flash-lite': { label: 'Gemini 2.5 Flash-Lite', id: 'models/gemini-2.5-flash-lite' },
+  'models/gemini-2.5-flash': { label: 'Gemini 2.5 Flash', id: 'models/gemini-2.5-flash' },
+};
+
+function normalizeModelId(id) {
+  if (!id || id === 'auto') return 'auto';
+  return id.startsWith('models/') ? id : `models/${id}`;
+}
+
+function uniqueModels(list) {
+  return [...new Set(list.map(normalizeModelId))].filter(Boolean);
+}
+
+function inferModelChain(prompt) {
+  const text = String(prompt || '');
+  const len = text.length;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const deepSignals = /(validate|validation|roadmap|pitch|strategy|architecture|swot|competitor|competition|investor|financial|detailed|comprehensive|exhaustive|analysis|breakdown|deep|risk|scenario|compare|market sizing|full report|recommendation)/i.test(text);
+  const veryDeep = len > 3200 || words > 450;
+  const deep = len > 1800 || words > 250 || deepSignals;
+  const medium = len > 850 || words > 120;
+
+  if (veryDeep) {
+    return uniqueModels([
+      'models/gemini-3.0-flash',
+      'models/gemini-2.5-pro',
+      'models/gemini-2.5-pro',
+      'models/gemini-2.5-flash',
+      'models/gemini-2.5-flash-lite',
+      'models/gemini-2.5-flash'
+    ]);
+  }
+
+  if (deep) {
+    return uniqueModels([
+      'models/gemini-3.0-flash',
+      'models/gemini-2.5-flash',
+      'models/gemini-2.5-flash-lite',
+      'models/gemini-2.5-flash',
+      'models/gemini-2.5-flash-lite'
+    ]);
+  }
+
+  if (medium) {
+    return uniqueModels([
+      'models/gemini-2.5-flash',
+      'models/gemini-2.5-flash-lite',
+      'models/gemini-2.0-flash'
+    ]);
+  }
+
+  return uniqueModels([
+    'models/gemini-3.0-flash',
+    'models/gemini-2.5-flash-lite',
+    'models/gemini-2.0-flash-lite',
+    'models/gemini-2.5-flash'
+  ]);
+}
+
+function getModelPlan(prompt) {
+  const selected = normalizeModelId(STATE.modelMode || 'auto');
+  const autoChain = inferModelChain(prompt);
+
+  if (selected && selected !== 'auto') {
+    return uniqueModels([selected, ...autoChain]);
+  }
+  return autoChain;
+}
+
+function shouldFallbackOnError(message) {
+  const m = String(message || '').toLowerCase();
+  if (!m) return true;
+  if (m.includes('invalid authentication') || m.includes('api key') || m.includes('quota') || m.includes('permission denied') || m.includes('unauthorized')) return false;
+  if (m.includes('model not found') || m.includes('unsupported') || m.includes('not available') || m.includes('404') || m.includes('400')) return true;
+  return true;
+}
+
+async function callGemini(prompt) {
+  const modelChain = getModelPlan(prompt);
+  const body = {
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: prompt }
+        ]
+      }
+    ],
+    generationConfig: {
+      temperature: 0.45,
+      topP: 0.95,
+      topK: 40,
+      maxOutputTokens: 6000
+    }
+  };
+
+  let lastError = null;
+
+  for (const modelId of modelChain) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/${modelId}:generateContent?key=${STATE.apiKey}`;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        const message = result?.error?.message || `Gemini API request failed (${modelId})`;
+        const error = new Error(message);
+        error.modelId = modelId;
+        throw error;
+      }
+
+      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) {
+        throw new Error(`No response from Gemini (${modelId})`);
+      }
+
+      return text
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+    } catch (err) {
+      lastError = err;
+      console.error(`Gemini Error (${modelId}):`, err);
+
+      const msg = String(err?.message || '');
+      if (!shouldFallbackOnError(msg)) {
+        throw err;
+      }
+    }
+  }
+
+  throw lastError || new Error('Gemini request failed');
+}
+
+/* ── EXAMPLE ────────────────────────────────────────── */
+function loadExample(){
+  document.getElementById('idea-input').value=
+  'A telemedicine platform for rural dental care in India. Patients in tier-2 and tier-3 cities cannot access qualified dentists. We connect them via video consultation with verified dental professionals, and use AI-powered image diagnosis from smartphone photos to detect caries, gum disease, and oral cancer early. Subscription model for clinics, B2C for patients.';
+  document.getElementById('idea-input').focus();
+}
+
+function demoSearch(){
+  startDemoMode();
+}
+
+const DEMO_SCENARIO = {
+  query: 'Build an AI-driven rural dental access platform for Chennai and nearby districts that helps patients discover clinics, triage dental needs, and connect to affordable care.',
+  s1: {
+    rawIdea: 'Build an AI-driven rural dental access platform for Chennai and nearby districts that helps patients discover clinics, triage dental needs, and connect to affordable care.',
+    problem: 'Large groups of patients in Chennai and surrounding districts cannot easily access trustworthy and affordable dental care. They face delays, unclear pricing and poor triage before visiting a clinic.',
+    targetUsers: 'Primary: patients, families and working professionals in Chennai and nearby districts. Secondary: clinics, dentists and referral partners looking for higher-quality patient acquisition.',
+    painPoints: [
+      'High upfront treatment cost and uncertain pricing before consultation.',
+      'Long travel and waiting time for routine and specialized dental visits.',
+      'Difficulty identifying a reliable clinic with the right specialty and capacity.',
+      'Low awareness of preventive and early-stage dental care.'
+    ],
+    existingAlternatives: [
+      'Walk-in clinic searches and local directories.',
+      'Generic telemedicine or appointment apps without dental specialization.'
+    ],
+    hiddenOpportunity: 'The hidden opportunity is to create a trust-first dental access layer that combines clinic discovery, triage, transparent pricing and guided care pathways. A strong local network can reduce friction for both patients and clinics while creating recurring demand through preventive plans and family bundles.',
+    industry: 'Healthcare · Dental services',
+    geography: 'Chennai, Tamil Nadu',
+    urgency: 'Demand for structured, affordable and convenient dental access is increasing as patients expect digital-first service discovery and faster care navigation.'
+  },
+  s2: {
+    executiveSummary: 'This venture builds a local dental access platform that helps patients find the right care quickly while helping clinics acquire better-fit patients. It combines discovery, triage, pricing transparency and care coordination into one workflow.',
+    tam: 'TAM (Total Addressable Market): the broader dental and oral-care spend across urban and semi-urban India, including clinic visits, preventive care and diagnostics.',
+    sam: 'SAM (Serviceable Addressable Market): the dental spend reachable within Chennai and nearby districts through digital acquisition and clinic partnerships.',
+    som: 'SOM (Serviceable Obtainable Market): the near-term share captured through a focused launch with a small clinic network and a targeted patient funnel.',
+    revenueModel: 'Primary revenue streams include consultation or booking fees, clinic subscription plans and premium family preventive plans. Additional revenue can come from diagnostics, partner referrals and appointment-led service bundles.',
+    moat: 'Competitive moat comes from local clinic partnerships, specialized workflow design, structured patient trust, and operational data that improves routing and retention over time.',
+    competitors: [
+      { name:'Generic directories', strength:'Large listing coverage', weakness:'Weak specialization and no workflow depth', gap:'Dental-first patient routing and trust building' },
+      { name:'General telehealth apps', strength:'Existing user base', weakness:'Not optimized for dental care', gap:'Specialized triage and care coordination' },
+      { name:'Standalone clinics', strength:'Clinical expertise', weakness:'Limited discovery and digital reach', gap:'Networked acquisition and repeat care loop' }
+    ],
+    mvpFeatures: [
+      'Query-to-clinic discovery and patient triage',
+      'Transparent treatment category pricing',
+      'Clinic profile and appointment routing',
+      'Preventive care reminders and family plans',
+      'Simple admin dashboard for clinic partners'
+    ],
+    estimatedStartupCost: 'Estimated launch cost: low-to-medium initial capex for product build, clinic onboarding and local growth operations. A lean pilot can start with a focused budget and scale after validation.',
+    teamRequired: [
+      'Founder — strategy, partnerships and product direction',
+      'Full-stack developer — interface and workflow implementation',
+      'Dental consultant — clinical validation and care logic',
+      'Growth/operator — clinic onboarding and user acquisition'
+    ]
+  },
+  s3: {
+    scores: {
+      market_demand:{score:8.6,reason:'High local demand exists because patients need faster and more transparent access to dental care.'},
+      technical_feasibility:{score:8.2,reason:'The workflow is straightforward to build with standard web tech and Gemini-assisted reasoning.'},
+      scalability:{score:7.8,reason:'The platform can expand city by city once clinic onboarding and routing are working.'},
+      revenue_potential:{score:7.9,reason:'Revenue can come from bookings, subscriptions and higher-value care bundles.'},
+      competitive_difficulty:{score:5.1,reason:'Competitors can imitate the idea, but not the local network and trust layer easily.'},
+      execution_complexity:{score:6.2,reason:'Operations and clinic coordination are harder than the UI itself.'},
+      regulatory_risk:{score:3.8,reason:'The core service is low to moderate risk if health claims remain conservative.'},
+      investor_attractiveness:{score:7.6,reason:'A focused, service-led healthcare model with recurring revenue is easy for judges to understand.'}
+    },
+    swot: {
+      strengths:['Clear local problem and strong user relevance','Multiple revenue streams','Trust and clinic network can compound'],
+      weaknesses:['Needs operational execution and clinic onboarding','Requires careful health messaging'],
+      opportunities:['Preventive care subscriptions','Corporate and family partnerships','Expansion to other cities'],
+      threats:['Large generic platforms entering the space','Price competition from local clinics']
+    },
+    recommendation:'Build the pilot with one dense local corridor first, prove patient acquisition and clinic conversion, then expand. Keep the product narrow, trusted and operationally excellent.'
+  },
+  s4: {
+    phases:[
+      {phase:'Phase 1', name:'Discovery and validation', duration:'Weeks 1-3', budget:'Lean pilot budget', deliverables:['Clinic interviews','User pain-point mapping','Pricing hypotheses'], kpis:['30+ interviews','Top 3 needs validated'], team:'Founder + advisor', risk:'Assumptions may be too broad'},
+      {phase:'Phase 2', name:'MVP build', duration:'Weeks 4-7', budget:'Focused dev budget', deliverables:['Search and triage flow','Clinic cards','Basic dashboard'], kpis:['Working pilot live','First clinic onboarded'], team:'Founder + developer', risk:'Scope creep and delays'},
+      {phase:'Phase 3', name:'Pilot launch', duration:'Weeks 8-10', budget:'Growth budget', deliverables:['First users','Clinic feedback loop','Operational support'], kpis:['Bookings initiated','Retention signals'], team:'Small core team', risk:'Low initial user adoption'},
+      {phase:'Phase 4', name:'Optimization', duration:'Weeks 11-14', budget:'Moderate scale budget', deliverables:['Conversion tuning','Pricing refinement','Trust-building assets'], kpis:['Better conversion rate','Lower drop-off'], team:'Product + growth', risk:'Operational bottlenecks'},
+      {phase:'Phase 5', name:'Scale expansion', duration:'Month 4 onwards', budget:'Scale as you grow', deliverables:['More clinic corridors','Referral loops','Partnership channels'], kpis:['City expansion readiness','Repeat usage'], team:'Expanded team', risk:'Competition and replication'}
+    ]
+  },
+  s5: {
+    elevatorPitch: 'We are building a dental access platform that helps patients find the right clinic faster, understand pricing more clearly and get routed to care with less friction.',
+    fullPitch: 'Most people do not struggle only with treatment, they struggle with finding the right place, the right price and the right care path. Our platform fixes that by turning a confusing search into a guided, trusted dental journey. We start with Chennai and nearby districts, where local demand is strong and the market is fragmented. We help patients discover clinics, triage needs and understand care options before they travel. Clinics benefit because they receive better-qualified patients and can offer transparent plans, family subscriptions and preventive packages. Over time, the system gets smarter as more local data improves routing, trust and repeat usage. Our goal is to create the default access layer for everyday dental care in the city.',
+    slides: [
+      {slide:1,title:'Problem',bullets:['Confusing access to dental care','Price opacity','Long wait and travel times']},
+      {slide:2,title:'Solution',bullets:['Dental-first discovery flow','Triage and routing','Transparent care access']},
+      {slide:3,title:'Market',bullets:['Large urban dental spend','Fragmented demand','Strong city pilot opportunity']},
+      {slide:4,title:'Product',bullets:['Search and routing','Clinic profile cards','Patient trust layer']},
+      {slide:5,title:'Revenue',bullets:['Booking fees','Subscriptions','Preventive plans']},
+      {slide:6,title:'Competition',bullets:['Generic directories','General telehealth apps','Standalone clinics']},
+      {slide:7,title:'Go-to-market',bullets:['Start with one corridor','Onboard clinics first','Build trust with patients']},
+      {slide:8,title:'Financials',bullets:['Low-lean pilot cost','Repeat usage upside','Recurring subscriptions']},
+      {slide:9,title:'Team',bullets:['Founder-led execution','Developer support','Dental validation advisor']},
+      {slide:10,title:'Ask',bullets:['Pilot clinics','Feedback users','Demo approval']}],
+    qa: [
+      {question:'Why now?', answer:'Patients expect digital discovery and faster navigation, while clinics need better quality leads.'},
+      {question:'What is your moat?', answer:'The moat is the local trust and routing layer built from clinic partnerships and usage data.'},
+      {question:'How do you scale?', answer:'Launch in one corridor, validate retention and repeat the clinic onboarding playbook city by city.'},
+      {question:'Why you?', answer:'You can position the product as a focused venture with strong problem clarity, not a vague health app.'}
+    ]
+  }
+};
+
+function setStage1DemoLock(active){
+  const ideaInput = document.getElementById('idea-input');
+  const actions = document.getElementById('stage1-actions');
+  const note = document.getElementById('stage1-demo-note');
+  const analyzeBtn = document.getElementById('s1-analyze-btn');
+  const loadBtn = document.getElementById('s1-load-example-btn');
+  const demoBtn = document.getElementById('s1-demo-search-btn');
+
+  if(ideaInput){
+    ideaInput.readOnly = !!active;
+    ideaInput.classList.toggle('demo-locked', !!active);
+  }
+  if(actions) actions.classList.toggle('hidden', !!active);
+  if(note) note.classList.toggle('hidden', !active);
+  if(analyzeBtn) analyzeBtn.disabled = !!active;
+  if(loadBtn) loadBtn.disabled = !!active;
+  if(demoBtn) demoBtn.disabled = !!active;
+}
+
+function renderDemoStage(stage){
+  if(!STATE.demoMode) return;
+  switch(stage){
+    case 1:
+      if(STATE.s1Data){ renderS1(STATE.s1Data); }
+      break;
+    case 2:
+      if(STATE.s2Data){
+        renderS2(STATE.s2Data);
+        document.getElementById('s2-output')?.classList.remove('hidden');
+        const b=document.getElementById('s2-next'); if(b) b.disabled=false;
+      }
+      break;
+    case 3:
+      if(STATE.s3Data){
+        renderS3(STATE.s3Data);
+        document.getElementById('s3-output')?.classList.remove('hidden');
+        const b=document.getElementById('s3-next'); if(b) b.disabled=false;
+      }
+      break;
+    case 4:
+      if(STATE.s4Data){
+        renderS4(STATE.s4Data);
+        document.getElementById('s4-output')?.classList.remove('hidden');
+        const b=document.getElementById('s4-next'); if(b) b.disabled=false;
+      }
+      break;
+    case 5:
+      if(STATE.s5Data){
+        renderS5(STATE.s5Data);
+        document.getElementById('s5-output')?.classList.remove('hidden');
+        const b=document.getElementById('s5-next'); if(b) b.disabled=false;
+      }
+      break;
+    case 6:
+      if(STATE.s1Data || STATE.s2Data || STATE.s3Data || STATE.s4Data || STATE.s5Data){
+        renderExecutionCenter();
+      }
+      break;
+  }
+}
+
+function loadDemoScenario(){
+  STATE.idea = DEMO_SCENARIO.query;
+  const ideaInput = document.getElementById('idea-input');
+  if(ideaInput){
+    ideaInput.value = DEMO_SCENARIO.query;
+  }
+
+  STATE.s1Data = JSON.parse(JSON.stringify(DEMO_SCENARIO.s1));
+  STATE.s2Data = JSON.parse(JSON.stringify(DEMO_SCENARIO.s2));
+  STATE.s3Data = JSON.parse(JSON.stringify(DEMO_SCENARIO.s3));
+  STATE.s4Data = JSON.parse(JSON.stringify(DEMO_SCENARIO.s4));
+  STATE.s5Data = JSON.parse(JSON.stringify(DEMO_SCENARIO.s5));
+  STATE.s3Data.probability = calcProbability(STATE.s3Data.scores);
+  STATE.s3Data.verdict = getVerdictLabel(STATE.s3Data.probability);
+
+  setStage1DemoLock(true);
+
+  save(KEYS.s1, STATE.s1Data);
+  save(KEYS.s2, STATE.s2Data);
+  save(KEYS.s3, STATE.s3Data);
+  save(KEYS.s4, STATE.s4Data);
+  save(KEYS.s5, STATE.s5Data);
+  save(KEYS.meta, { currentStage: 1, savedAt: Date.now() });
+
+  renderS1(STATE.s1Data);
+  const nextBtn = document.getElementById('s1-next');
+  if(nextBtn) nextBtn.disabled = false;
+  updateProgress(1);
+}
+
+function openLiveApiMode(){
+  const modal = document.getElementById('launch-choice');
+  if(modal) modal.classList.add('hidden');
+  const setup = document.getElementById('api-setup');
+  if(setup) setup.classList.remove('hidden');
+}
+
+function startDemoMode(){
+  const modal = document.getElementById('launch-choice');
+  if(modal) modal.classList.add('hidden');
+  const setup = document.getElementById('api-setup');
+  if(setup) setup.classList.add('hidden');
+  STATE.demoMode = true;
+  STATE.modelMode = 'auto';
+  document.getElementById('landing').classList.add('hidden');
+  showApp();
+  loadDemoScenario();
+}
+
+/* ══ STAGE 1 ══════════════════════════════════════════ */
+async function runStage1(){
+  if(STATE.demoMode){
+    renderDemoStage(1);
+    const nextBtn = document.getElementById('s1-next');
+    if(nextBtn) nextBtn.disabled = false;
+    return;
+  }
+  const idea=document.getElementById('idea-input').value.trim();
+  if(!idea||idea.length<20){showError('s1-error','Please describe your idea in at least 20 characters.');return}
+  clearError('s1-error');STATE.idea=idea;
+  showLoader('Extracting problem intelligence...','Analyzing market signals');
+  try{
+    const safeIdea = JSON.stringify(idea);
+    const prompt=`You are a startup problem analyst. Extract structured insights from this startup idea:
+${idea}
+
+Return ONLY valid JSON with this exact structure:
+{
+  "rawIdea": ${safeIdea},
+  "problem": "Core problem in 2 sentences",
+  "targetUsers": "Primary and secondary user segments",
+  "painPoints": ["pain point 1","pain point 2","pain point 3"],
+  "existingAlternatives": ["alternative 1","alternative 2"],
+  "hiddenOpportunity": "2-3 sentences on the overlooked opportunity angle",
+  "industry": "Industry category",
+  "geography": "Target geography",
+  "urgency": "Why this matters now (1-2 sentences)"
+}`;
+    const raw=await callGemini(prompt);
+    STATE.s1Data=safeJSON(raw);
+    save(KEYS.s1,STATE.s1Data);
+    renderS1(STATE.s1Data);
+    document.getElementById('s1-next').disabled=false;
+  }catch(e){showError('s1-error','AI error: '+e.message+'. Check your API key.')}
+  finally{hideLoader()}
+}
+
+function renderS1(d){
+  document.getElementById('s1-output').classList.remove('hidden');
+  const cards=[
+    {label:'Core Problem',val:d.problem,icon:'🎯'},
+    {label:'Target Users',val:d.targetUsers,icon:'👥'},
+    {label:'Industry',val:`${d.industry} · ${d.geography||''}`,icon:'🏭'},
+    {label:'Why Now',val:d.urgency,icon:'⚡'},
+  ];
+  document.getElementById('s1-cards').innerHTML=cards.map(c=>`
+    <div class="card"><div style="font-size:20px;margin-bottom:8px">${c.icon}</div>
+    <div style="font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:${
+      c.label==='Core Problem' ? '#ef4444' :
+      c.label==='Target Users' ? '#22c55e' :
+      c.label==='Industry' ? '#8b5e3c' :
+      '#1e3a8a'
+    };margin-bottom:8px">${c.label}</div>
+    <div style="font-size:17px;color:#f5f1e7;line-height:1.85">${renderRichText(c.val, { inline: true })}</div></div>`).join('');
+  document.getElementById('s1-opportunity').innerHTML=`<ul class="bullet vp-bullets">
+    ${(d.painPoints||[]).map(p=>`<li>${renderRichText(p, { inline: true })}</li>`).join('')}
+    </ul><p class="vp-opportunity-text" style="color:#c4b5fd">${renderRichText(d.hiddenOpportunity||'', { inline: true })}</p>`;
+  renderExecutionCenter();
+}
+
+/* ══ STAGE 2 ══════════════════════════════════════════ */
+async function runStage2(){
+  if(STATE.demoMode){
+    if(STATE.s2Data){ renderDemoStage(2); }
+    const nextBtn = document.getElementById('s2-next');
+    if(nextBtn) nextBtn.disabled = false;
+    return;
+  }
+  if(!STATE.s1Data){showError('s2-error','Complete Stage 1 first.');return}
+  clearError('s2-error');document.getElementById('s2-loading-btn').classList.add('hidden');
+  showLoader('Building venture architecture...','Sizing markets, mapping competition');
+  try{
+    const prompt=`You are a startup strategist and VC. Build a complete startup architecture for this idea:
+"${STATE.s1Data.rawIdea}"
+Industry: ${STATE.s1Data.industry}. Target users: ${STATE.s1Data.targetUsers}.
+
+Return ONLY valid JSON:
+{
+  "executiveSummary": "3-4 sentences of compelling exec summary",
+  "tam": "Total Addressable Market size with reasoning",
+  "sam": "Serviceable Addressable Market",
+  "som": "Serviceable Obtainable Market in year 1-2",
+  "revenueModel": "Primary revenue model with 2-3 streams and example pricing",
+  "moat": "Competitive moat — why competitors can't easily copy",
+  "competitors": [
+    {"name":"Competitor 1","strength":"...","weakness":"...","gap":"..."},
+    {"name":"Competitor 2","strength":"...","weakness":"...","gap":"..."},
+    {"name":"Competitor 3","strength":"...","weakness":"...","gap":"..."}
+  ],
+  "mvpFeatures": ["Feature 1","Feature 2","Feature 3","Feature 4","Feature 5"],
+  "estimatedStartupCost": "Realistic cost estimate with breakdown",
+  "teamRequired": ["Role 1 — responsibility","Role 2 — responsibility","Role 3 — responsibility","Role 4 — responsibility"]
+}`;
+    const raw=await callGemini(prompt);
+    STATE.s2Data = normalizeStage2(safeJSON(raw));
+    save(KEYS.s2,STATE.s2Data);
+    renderS2(STATE.s2Data);
+    document.getElementById('s2-next').disabled=false;
+  }catch(e){showError('s2-error','AI error: '+e.message);document.getElementById('s2-loading-btn').classList.remove('hidden')}
+  finally{hideLoader()}
+}
+
+function renderS2(d){
+  document.getElementById('s2-output').classList.remove('hidden');
+  document.getElementById('s2-summary').innerHTML=`<div style="font-size:18px;color:#f5f1e7;line-height:1.9">${renderRichText(d.executiveSummary)}</div>`;
+  document.getElementById('s2-market').innerHTML=[
+    {l:'TAM',v:d.tam,c:'var(--gold)'},{l:'SAM',v:d.sam,c:'var(--blue)'},{l:'SOM',v:d.som,c:'var(--green)'}
+  ].map(m=>`<div class="card" style="border-color:${m.c}22">
+    <div style="font-size:14px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${m.c};margin-bottom:10px">${m.l} <span style="font-size:11px;color:${m.c};font-weight:700;text-transform:none;letter-spacing:0">${m.l==='TAM'?' (Total Addressable Market)':m.l==='SAM'?' (Serviceable Addressable Market)':' (Serviceable Obtainable Market)'}</span></div>
+    <div style="font-size:16px;color:#f0ede4;line-height:1.8">${renderRichText(m.v)}</div></div>`).join('');
+  document.getElementById('s2-revenue').innerHTML=`
+    <div style="font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:12px">Revenue Architecture</div>
+    <div style="font-size:17px;font-weight:800;color:#7fe3d4;line-height:1.8;margin-bottom:12px">${renderRichText(d.revenueModel)}</div>
+    <div style="padding:14px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:14px;font-weight:700;color:var(--gold);margin-bottom:8px;text-transform:uppercase">COMPETITIVE MOAT</div>
+      <div style="font-size:15px;line-height:1.75;text-transform:none;font-weight:500;color:var(--text1)">${renderRichText(d.moat)}</div></div>`;
+  const comp=document.getElementById('s2-competitors');
+  comp.innerHTML=`<thead><tr>
+    <th>Competitor</th><th>Strength</th><th>Weakness</th><th>Gap We Fill</th>
+    </tr></thead><tbody>${(d.competitors||[]).map(c=>`<tr>
+    <td style="color:var(--text1);font-weight:600">${c.name}</td>
+    <td style="color:#22c55e">${c.strength}</td><td style="color:#f87171">${c.weakness}</td><td style="color:var(--gold)">${c.gap}</td>
+    </tr>`).join('')}</tbody>`;
+  document.getElementById('s2-mvp').innerHTML=`
+    <div style="font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:14px">MVP Feature Set</div>
+    <ul class="bullet">${(d.mvpFeatures||[]).map(f=>`<li>${f}</li>`).join('')}</ul>`;
+  document.getElementById('s2-team-cost').innerHTML=`
+    <div class="card"><div style="font-size:16px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:12px">Team Requirement</div>
+    <ul class="bullet">${(d.teamRequired||[]).map((item,i)=>`<li style="font-size:17px;line-height:1.85;font-weight:600;color:${['#60f7fa','#4ff19a','#e0ce14','#e137ed'][i%4]} !important">${escapeHTML(item)}</li>`).join('')}</ul></div>
+    <div class="card"><div style="font-size:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">Estimated Startup Cost</div>
+    <div style="font-size:17px;line-height:1.85;color:var(--text1)">${renderRichText(d.estimatedStartupCost)}</div></div>`;
+  renderExecutionCenter();
+}
+
+/* ══ STAGE 3 ══════════════════════════════════════════ */
+async function runStage3(){
+  if(STATE.demoMode){
+    if(STATE.s3Data){ renderDemoStage(3); }
+    const nextBtn = document.getElementById('s3-next');
+    if(nextBtn) nextBtn.disabled = false;
+    return;
+  }
+  if(!STATE.s2Data){showError('s3-error','Complete Stage 2 first.');return}
+  clearError('s3-error');document.getElementById('s3-loading-btn').classList.add('hidden');
+  showLoader('Running validation engine...','Scoring 8 venture dimensions');
+  try{
+    const prompt=`You are a venture capital analyst. Score this startup idea across 8 dimensions (0-10, use decimals):
+Idea: "${STATE.s1Data.rawIdea}"
+Industry: ${STATE.s1Data.industry}. Market: ${STATE.s2Data.tam}.
+
+Return ONLY valid JSON:
+{
+  "scores": {
+    "market_demand":           {"score":8.4,"reason":"2-sentence justification"},
+    "technical_feasibility":   {"score":7.1,"reason":"..."},
+    "scalability":             {"score":8.0,"reason":"..."},
+    "revenue_potential":       {"score":7.5,"reason":"..."},
+    "competitive_difficulty":  {"score":5.2,"reason":"..."},
+    "execution_complexity":    {"score":6.0,"reason":"..."},
+    "regulatory_risk":         {"score":3.5,"reason":"..."},
+    "investor_attractiveness": {"score":7.8,"reason":"..."}
+  },
+  "swot":{
+    "strengths":["S1","S2","S3"],
+    "weaknesses":["W1","W2"],
+    "opportunities":["O1","O2","O3"],
+    "threats":["T1","T2"]
+  },
+  "recommendation":"3-4 sentences of honest AI recommendation including what to watch out for"
+}`;
+    const raw=await callGemini(prompt);
+    STATE.s3Data = normalizeStage3(safeJSON(raw));
+    const prob=calcProbability(STATE.s3Data.scores);
+    STATE.s3Data.probability=prob;
+    STATE.s3Data.verdict=getVerdictLabel(prob);
+    save(KEYS.s3,STATE.s3Data);
+    renderS3(STATE.s3Data);
+    document.getElementById('s3-next').disabled=false;
+  }catch(e){showError('s3-error','AI error: '+e.message);document.getElementById('s3-loading-btn').classList.remove('hidden')}
+  finally{hideLoader()}
+}
+
+function calcProbability(s){
+  const raw=
+    s.market_demand.score*0.20+
+    s.revenue_potential.score*0.15+
+    s.scalability.score*0.15+
+    s.technical_feasibility.score*0.15+
+    s.investor_attractiveness.score*0.10+
+    (10-s.competitive_difficulty.score)*0.10-
+    s.regulatory_risk.score*0.15;
+  return Math.round(Math.max(0,Math.min(100,raw*10)));
+}
+function getVerdictLabel(p){
+  if(p>=80)return{label:'STRONG GO',color:'var(--green)'};
+  if(p>=65)return{label:'GO',color:'#a3e635'};
+  if(p>=50)return{label:'PIVOT',color:'var(--amber)'};
+  return{label:'HIGH RISK',color:'var(--red)'};
+}
+
+function renderS3(d){
+  document.getElementById('s3-output').classList.remove('hidden');
+  const v=d.verdict;
+  document.getElementById('s3-verdict').innerHTML=`
+    <div class="verdict-label">Venture Verdict</div>
+    <div class="verdict-text" style="color:${v.color}">${v.label}</div>
+    <div class="verdict-prob">Success Probability: <span style="color:${v.color}">${d.probability}%</span></div>`;
+  document.getElementById('s3-verdict').style.borderColor=v.color+'44';
+
+  const dimLabels={
+    market_demand:'Market Demand',technical_feasibility:'Tech Feasibility',
+    scalability:'Scalability',revenue_potential:'Revenue Potential',
+    competitive_difficulty:'Competitive Difficulty',execution_complexity:'Exec Complexity',
+    regulatory_risk:'Regulatory Risk',investor_attractiveness:'Investor Fit'
+  };
+  document.getElementById('s3-scores').innerHTML=Object.entries(d.scores).map(([k,v])=>`
+    <div class="score-card">
+      <div class="score-label">${dimLabels[k]||k}</div>
+      <div class="score-number">${v.score.toFixed(1)}</div>
+      <div class="score-bar"><div class="score-fill" style="width:${v.score*10}%"></div></div>
+      <div class="score-reason">${renderRichText(v.reason)}</div>
+    </div>`).join('');
+
+  // Radar chart
+  const labels=Object.values(dimLabels);
+  const dataVals=Object.values(d.scores).map(v=>v.score);
+  if(radarChart)radarChart.destroy();
+  radarChart=new Chart(document.getElementById('radar-chart'),{
+    type:'radar',
+    data:{
+      labels,
+      datasets:[{
+        data:dataVals,
+        backgroundColor:'rgba(232,201,109,0.12)',
+        borderColor:'#e8c96d',borderWidth:2,
+        pointBackgroundColor:'#e8c96d',pointRadius:4,
+        pointBorderColor:'transparent'
+      }]
+    },
+    options:{
+      responsive:true,
+      scales:{r:{
+        min:0,max:10,ticks:{stepSize:2,backdropColor:'transparent',color:'#ffffff',font:{size:10,weight:'700'}},
+        grid:{color:'rgba(255,255,255,0.08)'},
+        pointLabels:{color:'#ffffff',padding:6,font:{size:10,weight:'700',family:"'Syne',sans-serif"}}
+      }},
+      plugins:{legend:{display:false}}
+    }
+  });
+
+  const sw=d.swot;
+  document.getElementById('s3-swot').innerHTML=`
+    <div class="swot-cell swot-s"><div class="swot-head">Strengths</div>${listHTML(sw.strengths, 'swot-list', 'color:#86efac;font-weight:600')}</div>
+    <div class="swot-cell swot-w"><div class="swot-head">Weaknesses</div>${listHTML(sw.weaknesses, 'swot-list', 'color:#fda4af;font-weight:600')}</div>
+    <div class="swot-cell swot-o"><div class="swot-head">Opportunities</div>${listHTML(sw.opportunities, 'swot-list', 'color:#93c5fd;font-weight:600')}</div>
+    <div class="swot-cell swot-t"><div class="swot-head">Threats</div>${listHTML(sw.threats, 'swot-list', 'color:#fdba74;font-weight:600')}</div>`;
+  document.getElementById('s3-recommendation').innerHTML=`<div style="font-size:17px;line-height:1.9;color:var(--green);font-weight:600">${escapeHTML(d.recommendation||'').replace(/\n/g,'<br>')}</div>`;
+  renderExecutionCenter();
+}
+
+/* ══ STAGE 4 ══════════════════════════════════════════ */
+async function runStage4(){
+  if(STATE.demoMode){
+    if(STATE.s4Data){ renderDemoStage(4); }
+    const nextBtn = document.getElementById('s4-next');
+    if(nextBtn) nextBtn.disabled = false;
+    return;
+  }
+  if(!STATE.s3Data){showError('s4-error','Complete Stage 3 first.');return}
+  clearError('s4-error');document.getElementById('s4-loading-btn').classList.add('hidden');
+  showLoader('Generating execution roadmap...','Building realistic milestones');
+  try{
+    const prompt=`You are a startup execution expert. Create a 5-phase realistic roadmap for:
+"${STATE.s1Data.rawIdea}"
+Verdict: ${STATE.s3Data.verdict.label} (${STATE.s3Data.probability}% probability)
+
+Return ONLY valid JSON:
+{
+  "phases":[
+    {"phase":"Phase 1","name":"Research & Validation","duration":"Months 1-2",
+     "budget":"$X,XXX","deliverables":["D1","D2","D3"],
+     "kpis":["KPI 1","KPI 2"],"team":"Founder + 1 co-founder","risk":"Key risk"},
+    {"phase":"Phase 2","name":"MVP Development","duration":"Months 3-5",
+     "budget":"$XX,XXX","deliverables":["D1","D2","D3"],
+     "kpis":["KPI 1","KPI 2"],"team":"Founder + 1-2 devs","risk":"Key risk"},
+    {"phase":"Phase 3","name":"Pilot Launch","duration":"Months 6-8",
+     "budget":"$XX,XXX","deliverables":["D1","D2","D3"],
+     "kpis":["KPI 1","KPI 2"],"team":"Team of 4-5","risk":"Key risk"},
+    {"phase":"Phase 4","name":"Revenue Growth","duration":"Months 9-12",
+     "budget":"$XX,XXX","deliverables":["D1","D2"],
+     "kpis":["KPI 1","KPI 2"],"team":"Team of 6-8","risk":"Key risk"},
+    {"phase":"Phase 5","name":"Scale & Fundraise","duration":"Year 2",
+     "budget":"$X00,XXX","deliverables":["D1","D2"],
+     "kpis":["KPI 1","KPI 2"],"team":"Team of 10+","risk":"Key risk"}
+  ]
+}`;
+    const raw=await callGemini(prompt);
+    STATE.s4Data=safeJSON(raw);
+    save(KEYS.s4,STATE.s4Data);
+    renderS4(STATE.s4Data);
+    document.getElementById('s4-next').disabled=false;
+  }catch(e){showError('s4-error','AI error: '+e.message);document.getElementById('s4-loading-btn').classList.remove('hidden')}
+  finally{hideLoader()}
+}
+
+function renderS4(d){
+  document.getElementById('s4-output').classList.remove('hidden');
+  document.getElementById('s4-timeline').innerHTML=(d.phases||[]).map(p=>`
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-phase">${p.phase}</div>
+      <div class="tl-title">${p.name}</div>
+      <div class="tl-meta">
+        <span class="tl-tag">⏱ ${p.duration}</span>
+        <span class="tl-tag">💰 ${p.budget}</span>
+        <span class="tl-tag">👥 ${p.team}</span>
+      </div>
+      <div class="tl-body" style="margin-bottom:8px"><strong style="color:var(--text1)">Deliverables:</strong> ${renderRichText((Array.isArray(p.deliverables)?p.deliverables.join(' · '):''))}</div>
+      <div class="kpi-list">${(p.kpis||[]).map(k=>`<span class="kpi-chip">${k}</span>`).join('')}</div>
+      ${p.risk?`<div style="margin-top:8px;font-size:12px;color:var(--red);background:var(--red-bg);padding:6px 10px;border-radius:6px;display:inline-block">⚠ ${renderRichText(p.risk, { inline: true })}</div>`:''}
+    </div>`).join('');
+}
+
+/* ══ STAGE 5 ══════════════════════════════════════════ */
+async function runStage5(){
+  if(STATE.demoMode){
+    if(STATE.s5Data){ renderDemoStage(5); }
+    const nextBtn = document.getElementById('s5-next');
+    if(nextBtn) nextBtn.disabled = false;
+    return;
+  }
+  if(!STATE.s4Data){showError('s5-error','Complete Stage 4 first.');return}
+  clearError('s5-error');document.getElementById('s5-loading-btn').classList.add('hidden');
+  showLoader('Writing investor pitch materials...','Crafting your story');
+  try{
+    const prompt=`You are a top startup pitch coach. Write complete pitch materials for:
+"${STATE.s1Data.rawIdea}"
+Verdict: ${STATE.s3Data.verdict.label}, Probability: ${STATE.s3Data.probability}%
+Revenue model: ${STATE.s2Data.revenueModel}
+
+Return ONLY valid JSON:
+{
+  "elevatorPitch": "Compelling 30-second pitch, 2-3 sentences max. Start with the pain, not the product.",
+  "fullPitch": "Full 3-minute pitch script, 300-400 words, structured as: Hook → Problem → Solution → Market → Business Model → Traction → Team → Ask. Write it as a natural speech.",
+  "slides": [
+    {"slide":1,"title":"The Problem","bullets":["Bullet 1","Bullet 2","Bullet 3"]},
+    {"slide":2,"title":"Our Solution","bullets":["Bullet 1","Bullet 2","Bullet 3"]},
+    {"slide":3,"title":"Market Size","bullets":["Bullet 1","Bullet 2","Bullet 3"]},
+    {"slide":4,"title":"The Product","bullets":["Bullet 1","Bullet 2","Bullet 3"]},
+    {"slide":5,"title":"Business Model","bullets":["Bullet 1","Bullet 2","Bullet 3"]},
+    {"slide":6,"title":"Competition","bullets":["Bullet 1","Bullet 2","Bullet 3"]},
+    {"slide":7,"title":"Go-to-Market","bullets":["Bullet 1","Bullet 2","Bullet 3"]},
+    {"slide":8,"title":"Financials","bullets":["Bullet 1","Bullet 2","Bullet 3"]},
+    {"slide":9,"title":"The Team","bullets":["Bullet 1","Bullet 2","Bullet 3"]},
+    {"slide":10,"title":"The Ask","bullets":["Bullet 1","Bullet 2","Bullet 3"]}
+  ],
+  "qa": [
+    {"question":"Why now? What's changed in the market?","answer":"2-3 sentence confident answer"},
+    {"question":"How is this defensible against big players?","answer":"2-3 sentence answer"},
+    {"question":"What's your biggest risk and how do you mitigate it?","answer":"2-3 sentence answer"},
+    {"question":"Why are you the right team for this?","answer":"2-3 sentence answer"},
+    {"question":"What happens if a competitor copies you tomorrow?","answer":"2-3 sentence answer"}
+  ]
+}`;
+    const raw=await callGemini(prompt);
+    STATE.s5Data=safeJSON(raw);
+    save(KEYS.s5,STATE.s5Data);
+    renderS5(STATE.s5Data);
+    document.getElementById('s5-next').disabled=false;
+  }catch(e){showError('s5-error','AI error: '+e.message);document.getElementById('s5-loading-btn').classList.remove('hidden')}
+  finally{hideLoader()}
+}
+
+function renderS5(d){
+  document.getElementById('s5-output').classList.remove('hidden');
+  document.getElementById('s5-elevator').innerHTML=renderRichText(d.elevatorPitch);
+  document.getElementById('s5-full').innerHTML=`<div style="font-size:17px;color:var(--blue);line-height:1.9;font-weight:500">${renderRichText(d.fullPitch)}</div>`;
+  document.getElementById('s5-slides').innerHTML=(d.slides||[]).map((s,i)=>`
+    <div class="slide-card">
+      <div class="slide-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="slide-icon">${SLIDE_ICONS[i]||'📌'}</div>
+      <div class="slide-name" style="color:${slideTitleColor(i)};font-size:19px;font-weight:700;letter-spacing:0.01em">${renderRichText(s.title, { inline: true })}</div>
+      <ul class="bullet">${(s.bullets||[]).map(b=>`<li>${renderRichText(b, { inline: true })}</li>`).join('')}</ul>
+    </div>`).join('');
+  document.getElementById('s5-qa').innerHTML=(d.qa||[]).map(q=>`
+    <div class="qa-card">
+      <div class="qa-question">Q: ${renderRichText(q.question, { inline: true })}</div>
+      <div class="qa-answer">${renderRichText(q.answer)}</div>
+    </div>`).join('');
+}
+
+/* ══ EXPORT ═══════════════════════════════════════════ */
+function buildPDFContent(title, bodyHTML){
+  const container=document.getElementById('pdf-container');
+  container.innerHTML=`
+    <h1>${title}</h1>
+    <div class="pdf-meta">Generated by Venture.AI · FlowZint AI Hackathon 2026 · ${new Date().toLocaleDateString()}</div>
+    ${bodyHTML}`;
+  return container;
+}
+
+function nextFrame(){
+  return new Promise(requestAnimationFrame);
+}
+
+async function exportFullReport(){
+  if(!STATE.s1Data){alert('Complete at least Stage 1 first.');return}
+  const ideaName=STATE.s1Data.industry||'Venture';
+  let body=`
+    <div class="pdf-section"><h2>1. Problem Intelligence</h2>
+      <p><strong>Problem:</strong> ${STATE.s1Data.problem}</p>
+      <p><strong>Target Users:</strong> ${STATE.s1Data.targetUsers}</p>
+      <p><strong>Opportunity:</strong> ${STATE.s1Data.hiddenOpportunity}</p>
+    </div>`;
+  if(STATE.s2Data)body+=`
+    <div class="pdf-section"><h2>2. Venture Architecture</h2>
+      <p>${STATE.s2Data.executiveSummary}</p>
+      <p><strong>TAM:</strong> ${STATE.s2Data.tam}</p>
+      <p><strong>Revenue Model:</strong> ${STATE.s2Data.revenueModel}</p>
+      <p><strong>Competitive Moat:</strong> ${STATE.s2Data.moat}</p>
+    </div>`;
+  if(STATE.s3Data)body+=`
+    <div class="pdf-section"><h2>3. Validation Score</h2>
+      <div class="pdf-verdict" style="color:${STATE.s3Data.verdict.color||'#111'}">${STATE.s3Data.verdict.label} · ${STATE.s3Data.probability}%</div>
+      ${Object.entries(STATE.s3Data.scores).map(([k,v])=>
+        `<div class="pdf-score-row"><span>${k.replace(/_/g,' ')}</span><span>${v.score}/10</span></div>`).join('')}
+      <p style="margin-top:12px">${STATE.s3Data.recommendation}</p>
+    </div>`;
+  if(STATE.s4Data)body+=`
+    <div class="pdf-section"><h2>4. Execution Roadmap</h2>
+      ${(STATE.s4Data.phases||[]).map(p=>
+        `<p><strong>${p.phase} — ${p.name}</strong> (${p.duration}, ${p.budget})<br>${(p.deliverables||[]).join(', ')}</p>`).join('')}
+    </div>`;
+  if(STATE.s5Data)body+=`
+    <div class="pdf-section"><h2>5. Pitch</h2>
+      <p><em>${STATE.s5Data.elevatorPitch}</em></p>
+      <p style="margin-top:12px">${STATE.s5Data.fullPitch}</p>
+    </div>`;
+  const el=buildPDFContent(`Venture.AI Report — ${ideaName}`, body);
+  await renderPdfFromContainer(el, `Venture.AI_Report_${Date.now()}.pdf`);
+}
+
+async function exportSummary(){
+  if(!STATE.s1Data||!STATE.s2Data){alert('Complete Stages 1 and 2 first.');return}
+  const body=`
+    <div class="pdf-section"><h2>Executive Summary</h2><p>${STATE.s2Data.executiveSummary}</p></div>
+    <div class="pdf-section"><h2>The Problem</h2><p>${STATE.s1Data.problem}</p><p>${STATE.s1Data.hiddenOpportunity}</p></div>
+    <div class="pdf-section"><h2>Market Opportunity</h2><p>TAM: ${STATE.s2Data.tam}</p><p>SAM: ${STATE.s2Data.sam}</p><p>SOM: ${STATE.s2Data.som}</p></div>
+    <div class="pdf-section"><h2>Revenue Model</h2><p>${STATE.s2Data.revenueModel}</p></div>
+    <div class="pdf-section"><h2>Competitive Moat</h2><p>${STATE.s2Data.moat}</p></div>
+    ${STATE.s3Data?`<div class="pdf-section"><h2>Validation</h2><div class="pdf-verdict">${STATE.s3Data.verdict.label} — ${STATE.s3Data.probability}% Success Probability</div></div>`:''}`;
+  const el=buildPDFContent('Executive Summary', body);
+  await renderPdfFromContainer(el, `Venture.AI_ExecSummary_${Date.now()}.pdf`);
+}
+
+async function exportPitch(){
+  if(!STATE.s5Data){alert('Complete Stage 5 (Pitch Builder) first.');return}
+  const body=`
+    <div class="pdf-section"><h2>Elevator Pitch (30 seconds)</h2><p><em>${STATE.s5Data.elevatorPitch}</em></p></div>
+    <div class="pdf-section"><h2>3-Minute Pitch</h2><p style="white-space:pre-line">${STATE.s5Data.fullPitch}</p></div>
+    <div class="pdf-section"><h2>Judge Q&A Prep</h2>
+      ${(STATE.s5Data.qa||[]).map(q=>`<p><strong>Q: ${q.question}</strong><br>A: ${q.answer}</p>`).join('')}
+    </div>`;
+  const el=buildPDFContent('Pitch Materials', body);
+  await renderPdfFromContainer(el, `Venture.AI_Pitch_${Date.now()}.pdf`);
+}
+
+async function exportStartupSheet(){
+  if(!STATE.s1Data){alert('Complete Stage 1 first.');return}
+  const body=`
+    <div class="pdf-section">
+      <p><strong>Industry:</strong> ${STATE.s1Data.industry} · ${STATE.s1Data.geography||''}</p>
+      <p><strong>Problem:</strong> ${STATE.s1Data.problem}</p>
+      <p><strong>Users:</strong> ${STATE.s1Data.targetUsers}</p>
+      ${STATE.s2Data?`<p><strong>Revenue:</strong> ${STATE.s2Data.revenueModel}</p><p><strong>Moat:</strong> ${STATE.s2Data.moat}</p>`:''}
+      ${STATE.s3Data?`<p><strong>Verdict:</strong> ${STATE.s3Data.verdict.label} (${STATE.s3Data.probability}%)</p>`:''}
+      ${STATE.s4Data?`<p><strong>Next Milestone:</strong> ${STATE.s4Data.phases?.[0]?.name} (${STATE.s4Data.phases?.[0]?.duration})</p>`:''}
+    </div>`;
+  const el=buildPDFContent('Startup at a Glance', body);
+  await renderPdfFromContainer(el, `Venture.AI_StartupSheet_${Date.now()}.pdf`);
+}
+
+
+/* ── PDF EXPORT REBUILD ─────────────────────────────── */
+function escapeHtml(value){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+function listToHtml(items, cls='pdf-list'){
+  const arr = Array.isArray(items) ? items : [];
+  if(!arr.length) return '<p style="color:#777">Not generated yet.</p>';
+  return `<ul class="${cls}">${arr.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
+}
+
+function makePdfSection(title, body){
+  return `
+    <div class="pdf-section">
+      <h2>${escapeHtml(title)}</h2>
+      ${body}
+    </div>`;
+}
+
+function buildCombinedReportBody(){
+  const idea = STATE.s1Data?.rawIdea || document.getElementById('idea-input')?.value || 'Startup idea';
+  const industry = STATE.s1Data?.industry || 'Not generated yet';
+  const geography = STATE.s1Data?.geography || 'Not generated yet';
+  const verdict = STATE.s3Data?.verdict?.label || 'Not generated yet';
+  const probability = STATE.s3Data?.probability ?? '—';
+
+  let body = `
+    <div class="pdf-section" style="padding:26px 28px;border:2px solid #e8c96d;border-radius:16px;background:#fffdf3;">
+      <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#b08c2d;font-weight:00;margin-bottom:10px;">Venture.AI Engine</div>
+      <h1 style="margin:0 0 10px 0;color:#111;">Venture.AI Full Venture Report</h1>
+      <p style="font-size:18px;line-height:1.8;color:#333;margin-bottom:14px;">${escapeHtml(idea)}</p>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;">
+        <div style="padding:14px;border:1px solid #ecd78e;border-radius:12px;background:#fff;"> <div style="font-size:12px;color:#b08c2d;font-weight:700;text-transform:uppercase;letter-spacing:.12em;">Industry</div><div style="font-size:16px;margin-top:6px;">${escapeHtml(industry)}</div></div>
+        <div style="padding:14px;border:1px solid #ecd78e;border-radius:12px;background:#fff;"> <div style="font-size:12px;color:#b08c2d;font-weight:700;text-transform:uppercase;letter-spacing:.12em;">Geography</div><div style="font-size:16px;margin-top:6px;">${escapeHtml(geography)}</div></div>
+        <div style="padding:14px;border:1px solid #ecd78e;border-radius:12px;background:#fff;"> <div style="font-size:12px;color:#b08c2d;font-weight:700;text-transform:uppercase;letter-spacing:.12em;">Verdict</div><div style="font-size:16px;margin-top:6px;">${escapeHtml(String(verdict))} · ${escapeHtml(String(probability))}%</div></div>
+      </div>
+    </div>`;
+
+  body += makePdfSection('1. Problem Intelligence', `
+    <p><strong>Problem:</strong> ${escapeHtml(STATE.s1Data?.problem || 'Not generated yet.')}</p>
+    <p><strong>Target Users:</strong> ${escapeHtml(STATE.s1Data?.targetUsers || 'Not generated yet.')}</p>
+    <p><strong>Why Now:</strong> ${escapeHtml(STATE.s1Data?.urgency || 'Not generated yet.')}</p>
+    <p><strong>Hidden Opportunity:</strong> ${escapeHtml(STATE.s1Data?.hiddenOpportunity || 'Not generated yet.')}</p>
+    <p><strong>Pain Points:</strong></p>
+    ${listToHtml(STATE.s1Data?.painPoints)}
+  `);
+
+  body += makePdfSection('2. Venture Architecture', `
+    <p>${escapeHtml(STATE.s2Data?.executiveSummary || 'Not generated yet.')}</p>
+    <p><strong>TAM:</strong> ${escapeHtml(STATE.s2Data?.tam || 'Not generated yet.')}</p>
+    <p><strong>SAM:</strong> ${escapeHtml(STATE.s2Data?.sam || 'Not generated yet.')}</p>
+    <p><strong>SOM:</strong> ${escapeHtml(STATE.s2Data?.som || 'Not generated yet.')}</p>
+    <p><strong>Revenue Model:</strong> ${escapeHtml(STATE.s2Data?.revenueModel || 'Not generated yet.')}</p>
+    <p><strong>Competitive Moat:</strong> ${escapeHtml(STATE.s2Data?.moat || 'Not generated yet.')}</p>
+    <p><strong>Estimated Startup Cost:</strong> ${escapeHtml(STATE.s2Data?.estimatedStartupCost || 'Not generated yet.')}</p>
+    <p><strong>Competitors:</strong></p>
+    ${Array.isArray(STATE.s2Data?.competitors) && STATE.s2Data.competitors.length ? `
+      <ul class="pdf-list">
+        ${STATE.s2Data.competitors.map(c => `
+          <li><strong>${escapeHtml(c.name || 'Competitor')}</strong> — Strength: ${escapeHtml(c.strength || '')}. Weakness: ${escapeHtml(c.weakness || '')}. Gap: ${escapeHtml(c.gap || '')}</li>
+        `).join('')}
+      </ul>` : '<p>Not generated yet.</p>'}
+    <p><strong>MVP Features:</strong></p>
+    ${listToHtml(STATE.s2Data?.mvpFeatures)}
+    <p><strong>Team Required:</strong></p>
+    ${listToHtml(STATE.s2Data?.teamRequired)}
+  `);
+
+  body += makePdfSection('3. Validation Score', `
+    ${STATE.s3Data ? `<div class="pdf-verdict" style="color:${STATE.s3Data.verdict?.color || '#111'}">${escapeHtml(STATE.s3Data.verdict?.label || '—')} · ${escapeHtml(String(STATE.s3Data.probability ?? '—'))}%</div>` : '<p>Not generated yet.</p>'}
+    ${STATE.s3Data?.scores ? Object.entries(STATE.s3Data.scores).map(([k,v]) => `
+      <div class="pdf-score-row"><span>${escapeHtml(k.replace(/_/g,' '))}</span><span><strong>${escapeHtml(String(v.score ?? '—'))}/10</strong></span></div>
+      <p style="margin:4px 0 10px 0;color:#444;">${escapeHtml(v.reason || '')}</p>
+    `).join('') : '<p>Scorecard not generated yet.</p>'}
+    <p><strong>SWOT — Strengths:</strong></p>
+    ${listToHtml(STATE.s3Data?.swot?.strengths)}
+    <p><strong>SWOT — Weaknesses:</strong></p>
+    ${listToHtml(STATE.s3Data?.swot?.weaknesses)}
+    <p><strong>SWOT — Opportunities:</strong></p>
+    ${listToHtml(STATE.s3Data?.swot?.opportunities)}
+    <p><strong>SWOT — Threats:</strong></p>
+    ${listToHtml(STATE.s3Data?.swot?.threats)}
+    <p><strong>AI Recommendation:</strong> ${escapeHtml(STATE.s3Data?.recommendation || 'Not generated yet.')}</p>
+  `);
+
+  body += makePdfSection('4. Execution Roadmap', `
+    ${Array.isArray(STATE.s4Data?.phases) && STATE.s4Data.phases.length ? STATE.s4Data.phases.map(p => `
+      <div style="margin-bottom:16px;padding:14px;border:1px solid #eee;border-radius:12px;background:#fff;">
+        <p style="margin:0 0 6px 0;"><strong>${escapeHtml(p.phase || '')} — ${escapeHtml(p.name || '')}</strong></p>
+        <p style="margin:0 0 4px 0;"><strong>Duration:</strong> ${escapeHtml(p.duration || '')} · <strong>Budget:</strong> ${escapeHtml(p.budget || '')} · <strong>Team:</strong> ${escapeHtml(p.team || '')}</p>
+        <p style="margin:0 0 6px 0;"><strong>Deliverables:</strong> ${escapeHtml((p.deliverables || []).join(', '))}</p>
+        <p style="margin:0 0 6px 0;"><strong>KPIs:</strong> ${escapeHtml((p.kpis || []).join(', '))}</p>
+        <p style="margin:0;"><strong>Risk:</strong> ${escapeHtml(p.risk || '')}</p>
+      </div>
+    `).join('') : '<p>Not generated yet.</p>'}
+  `);
+
+  body += makePdfSection('5. Pitch Materials', `
+    <p><strong>Elevator Pitch:</strong></p>
+    <p>${escapeHtml(STATE.s5Data?.elevatorPitch || 'Not generated yet.')}</p>
+    <p><strong>3-Minute Pitch:</strong></p>
+    <p style="white-space:pre-line;">${escapeHtml(STATE.s5Data?.fullPitch || 'Not generated yet.')}</p>
+    <p><strong>10-Slide Outline:</strong></p>
+    ${Array.isArray(STATE.s5Data?.slides) && STATE.s5Data.slides.length ? STATE.s5Data.slides.map(s => `
+      <div style="margin-bottom:12px;padding:12px;border:1px solid #eee;border-radius:10px;">
+        <p style="margin:0 0 6px 0;"><strong>Slide ${escapeHtml(String(s.slide || ''))}: ${escapeHtml(s.title || '')}</strong></p>
+        ${listToHtml(s.bullets)}
+      </div>
+    `).join('') : '<p>Not generated yet.</p>'}
+    <p><strong>Judge Q&A:</strong></p>
+    ${Array.isArray(STATE.s5Data?.qa) && STATE.s5Data.qa.length ? STATE.s5Data.qa.map(q => `
+      <div style="margin-bottom:12px;padding:12px;border:1px solid #eee;border-radius:10px;">
+        <p style="margin:0 0 6px 0;"><strong>Q:</strong> ${escapeHtml(q.question || '')}</p>
+        <p style="margin:0;"><strong>A:</strong> ${escapeHtml(q.answer || '')}</p>
+      </div>
+    `).join('') : '<p>Not generated yet.</p>'}
+  `);
+
+  body += makePdfSection('6. Submission Ready Summary', `
+    <p>This single PDF combines the full venture flow into one document for review and submission support.</p>
+    <p><strong>Current Stage:</strong> ${escapeHtml(String(STATE.currentStage || 1))} of 6</p>
+    <p><strong>Auto Model Mode:</strong> ${escapeHtml(STATE.modelMode || 'auto')}</p>
+    <p><strong>Generated On:</strong> ${escapeHtml(new Date().toLocaleString())}</p>
+  `);
+
+  return body;
+}
+
+async function renderPdfFromContainer(container, filename){
+  const prev = {
+    left: container.style.left,
+    top: container.style.top,
+    opacity: container.style.opacity,
+    visibility: container.style.visibility,
+    display: container.style.display,
+    transform: container.style.transform,
+    zIndex: container.style.zIndex,
+    width: container.style.width,
+    maxWidth: container.style.maxWidth,
+    overflow: container.style.overflow
+  };
+
+  container.style.position = 'fixed';
+  container.style.left = '-99999px';
+  container.style.top = '0';
+  container.style.opacity = '1';
+  container.style.visibility = 'visible';
+  container.style.display = 'block';
+  container.style.transform = 'none';
+  container.style.zIndex = '-1';
+  container.style.width = '860px';
+  container.style.maxWidth = '860px';
+  container.style.overflow = 'visible';
+
+  await nextFrame();
+  await nextFrame();
+  await new Promise(r => setTimeout(r, 1200));
+
+  const opts = {
+    margin:[12,12,12,12],
+    filename,
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{
+      scale:2.5,
+      useCORS:true,
+      logging:false,
+      backgroundColor:'#ffffff',
+      windowWidth: 1280,
+      windowHeight: Math.max(2400, container.scrollHeight + 200),
+      scrollX: 0,
+      scrollY: 0,
+      onclone: (clonedDoc) => {
+        const cloned = clonedDoc.getElementById('pdf-container');
+        if (cloned) {
+          cloned.style.position = 'fixed';
+          cloned.style.left = '-99999px';
+          cloned.style.top = '0';
+          cloned.style.opacity = '1';
+          cloned.style.visibility = 'visible';
+          cloned.style.transform = 'none';
+          cloned.style.display = 'block';
+          cloned.style.width = '860px';
+          cloned.style.maxWidth = '860px';
+          cloned.style.pointerEvents = 'none';
+          cloned.style.overflow = 'visible';
+        }
+      }
+    },
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+  };
+
+  try {
+    await html2pdf().set(opts).from(container).save();
+  } finally {
+    Object.assign(container.style, prev);
+  }
+}
+function resetApp(){
+  Object.values(KEYS).forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
+
+/* ── INIT ───────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded',()=>{
+  const ideaInput = document.getElementById('idea-input');
+  if(ideaInput){
+    ideaInput.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' && !e.shiftKey){
+        e.preventDefault();
+        if(document.getElementById('stage-1')?.classList.contains('active')){
+          runStage1();
+        }
+      }
+    });
+  }
+  const modelSelect = document.getElementById('model-select');
+  if(modelSelect){
+    modelSelect.addEventListener('change', () => {
+      STATE.modelMode = modelSelect.value || 'auto';
+      save('vp_model_mode', STATE.modelMode);
+    });
+    const savedMode = load('vp_model_mode');
+    if(savedMode) {
+      STATE.modelMode = savedMode;
+      modelSelect.value = savedMode;
+    }
+  }
+});
+document.addEventListener('keydown',e=>{
+  const target = e.target;
+  if(target && target.id==='idea-input' && e.key==='Enter' && !e.shiftKey && !e.isComposing){
+    e.preventDefault();
+    if(STATE.currentStage===1) runStage1();
+  }
+});
+
+function buildStage6Verdict(){
+  const mount = document.getElementById('vp-stage6-verdict');
+  if(!mount) return;
+
+  const scoresObj = (STATE && STATE.s3Data && STATE.s3Data.scores) || {};
+  const vals = Object.values(scoresObj)
+    .map(v => Number((v && v.score) || 0))
+    .filter(v => !isNaN(v));
+
+  let confidence = vals.length
+    ? Math.round(vals.reduce((a,b)=>a+b,0) / vals.length)
+    : 84;
+
+  confidence = Math.max(35, Math.min(98, confidence));
+
+  let verdict = 'ITERATE';
+  let cls = 'iterate';
+  let recommendation = 'Refine positioning and validate stronger market demand before scaling.';
+
+  if(confidence >= 78){
+    verdict = 'GO';
+    cls = 'go';
+    recommendation = 'Validate MVP demand before fundraising and accelerate early execution.';
+  } else if(confidence < 55){
+    verdict = 'STOP';
+    cls = 'stop';
+    recommendation = 'Reassess market fit, execution feasibility and monetization before proceeding.';
+  }
+
+  mount.innerHTML = `
+    <div class="vp-verdict-card">
+      <div class="vp-verdict-label">Venture Verdict</div>
+      <div class="vp-verdict-main">
+        <div class="vp-verdict-status ${cls}">${verdict}</div>
+        <div class="vp-verdict-meta">
+          <div><span>Confidence:</span> ${confidence}%</div>
+          <div><span>Immediate Recommendation:</span> ${recommendation}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+function renderVentureVerdict(){
+ const mount=document.getElementById('vp-stage6-verdict');
+ if(!mount) return;
+
+ const s3=(window.STATE&&STATE.s3Data)?STATE.s3Data:null;
+ let confidence=84;
+
+ if(s3&&s3.scores){
+   const vals=Object.values(s3.scores)
+   .map(v=>Number((v&&v.score)||0))
+   .filter(v=>!isNaN(v));
+
+   if(vals.length){
+      confidence=Math.round(
+         (vals.reduce((a,b)=>a+b,0)/vals.length)*10
+      );
+   }
+ }
+
+ let verdict='ITERATE';
+ let cls='verdict-iterate';
+ let recommendation='Validate demand further before scaling aggressively.';
+
+ if(confidence>=78){
+   verdict='GO';
+   cls='verdict-go';
+   recommendation='Validate MVP demand before fundraising and begin lean execution.';
+ }else if(confidence<55){
+   verdict='STOP';
+   cls='verdict-stop';
+   recommendation='Reassess market fit, monetization and feasibility before proceeding.';
+ }
+
+ mount.innerHTML=`
+ <div class="venture-verdict-card">
+   <div class="verdict-heading">VENTURE VERDICT</div>
+   <div class="verdict-status ${cls}">${verdict}</div>
+   <div class="verdict-confidence"><strong>Confidence:</strong> ${confidence}%</div>
+   <div class="verdict-rec">
+   <strong>Immediate Recommendation:</strong><br>
+   ${recommendation}
+   </div>
+ </div>`;
+}
+
+</script>
+
+<script>
+(function(){
+const stageSources={
+1:["World Bank","OECD","McKinsey & Company","Deloitte Insights","PwC Strategy&","Statista","CB Insights"],
+2:["Gartner","Statista","Grand View Research","Fortune Business Insights","Crunchbase","IBISWorld","McKinsey & Company"],
+3:["Y Combinator Library","Harvard Business Review","Sequoia Capital","Bain & Company","CB Insights","Startup Genome","First Round Review"],
+4:["PMI","Atlassian Agile","Lean Startup","Y Combinator","AWS Startups","Microsoft for Startups","Scrum.org"],
+5:["Sequoia Capital","Y Combinator","Techstars","Guy Kawasaki","Andreessen Horowitz","OpenView","OpenVC"],
+6:["Gartner","McKinsey & Company","Deloitte","PwC","Statista","CB Insights","Crunchbase","OECD","World Bank","Harvard Business Review"]
+};
+function inject(){
+ document.querySelectorAll('.stage').forEach((s,i)=>{
+   if(s.querySelector('.vp-sources')) return;
+   const d=document.createElement('div');
+   d.className='vp-sources';
+   const demo=(window.demoMode===true||window.isDemoMode===true);
+   d.innerHTML='<b>'+(demo?'Representative Sources (Demo)':'Sources Referenced')+':</b> '+stageSources[i+1].join(' • ');
+   const f=s.querySelector('.stage-footer');
+   if(f) f.parentNode.insertBefore(d,f); else s.appendChild(d);
+ });
+}
+document.addEventListener('DOMContentLoaded',function(){setTimeout(inject,300);});
+})();
+</script>
+
+</body>
+</html>
