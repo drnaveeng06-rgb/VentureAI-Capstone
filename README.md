@@ -84,5 +84,6 @@ https://www.linkedin.com/in/drnaveen06
 
 © 2026 Dr. Naveen Gokul R. All rights reserved.
 
-This project is published to showcase my work and technical skills. It may be viewed for educational and evaluation purposes. Reproducing, redistributing, or representing this work as your own without prior permission is prohibited.
-This repository is publicly accessible solely to comply with the submission requirements of the Flowzint AI Hackathon 2026.
+This repository is publicly accessible solely to comply with the submission requirements of the Flowzint AI Hackathon 2026. It is published to showcase my work, product development and technical capabilities for educational and evaluation purposes.
+
+No part of this repository may be copied, reproduced, modified, redistributed or presented as your own without prior written permission from the author.
