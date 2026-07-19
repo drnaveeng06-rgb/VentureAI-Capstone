@@ -1,7 +1,10 @@
 # VentureAI-Capstone
 
-Flowzint AI Hackathon 2026
-AI-powered startup co-founder platform developed for Product Matters 6.0 Capstone developed by Dr. Naveen Gokul R.
+AI-powered startup co-founder platform for Flowzint AI Hackathon 2026, developed by Dr. Naveen Gokul R.
+
+## Description
+
+AI-powered startup co-founder platform that helps founders validate ideas, analyze markets, evaluate competitors, design business models and generate investor-ready strategies using Generative AI.
 
 ## Features
 
@@ -14,17 +17,30 @@ AI-powered startup co-founder platform developed for Product Matters 6.0 Capston
 - Roadmap generation
 - Investor pitch generator
 - Founder Command Center
-- Export to PDF
 
 ## Tech Stack
 
-- HTML
-- CSS
+- HTML5
+- CSS3
 - JavaScript
 - Gemini API
 - Chart.js
 
 ## Modes
 
-- Demo Mode
-- Live AI Mode
+- Demo Mode – Explore the platform using sample startup data.
+- Live AI Mode – Generate personalized startup analysis using the Gemini API.
+
+  ## How to Run
+
+1. Clone the repository.
+2. Open `index.html` in your browser.
+3. Choose Demo Mode or Live AI Mode.
+4. For Live AI Mode, enter your Gemini API key.
+
+   ## Author
+
+**Dr. Naveen Gokul R**
+
+LinkedIn:
+https://www.linkedin.com/in/drnaveen06
