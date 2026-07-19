@@ -36,7 +36,7 @@ AI-powered startup co-founder platform that helps founders validate ideas, analy
 1. Clone the repository.
 2. Open `index.html` in your browser.
 3. Choose Demo Mode or Live AI Mode.
-4. For Live AI Mode, enter your Gemini API key.
+4. For Live AI Mode, enter your Gemini API key and choose among the various Gemini API models based on your search requirements.
 
 ## Author
 
