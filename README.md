@@ -1,4 +1,4 @@
-# Venture.AI tool
+# Venture.AI
 
 AI-powered business validation engine, startup co-founder platform for Flowzint AI Hackathon 2026, developed by Dr. Naveen Gokul R.
 
