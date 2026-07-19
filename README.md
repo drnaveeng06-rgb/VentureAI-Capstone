@@ -1,7 +1,7 @@
 # VentureAI-Capstone
 
 Flowzint AI Hackathon 2026
-AI-powered startup co-founder platform developed for Product Matters 6.0 Capstone.
+AI-powered startup co-founder platform developed for Product Matters 6.0 Capstone developed by Dr. Naveen Gokul R.
 
 ## Features
 
