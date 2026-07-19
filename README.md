@@ -1,6 +1,6 @@
-# VentureAI-Capstone
+# Venture.AI tool
 
-AI-powered startup co-founder platform for Flowzint AI Hackathon 2026, developed by Dr. Naveen Gokul R.
+AI-powered business validation engine, startup co-founder platform for Flowzint AI Hackathon 2026, developed by Dr. Naveen Gokul R.
 
 ## Description
 
