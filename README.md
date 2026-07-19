@@ -44,3 +44,9 @@ AI-powered startup co-founder platform that helps founders validate ideas, analy
 
 LinkedIn:
 https://www.linkedin.com/in/drnaveen06
+
+## Copyright & Usage
+
+© 2026 Dr. Naveen Gokul R. All rights reserved.
+
+This project is published to showcase my work and technical skills. It may be viewed for educational and evaluation purposes. Reproducing, redistributing, or representing this work as your own without prior permission is prohibited.
